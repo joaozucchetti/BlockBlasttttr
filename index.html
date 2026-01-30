@@ -1539,6 +1539,40 @@
             50% { transform: translate(-50%, -150%) scale(1.2); opacity: 1; }
             100% { transform: translate(-50%, -200%) scale(1); opacity: 0; }
         }
+        /* Final authoritative mobile-safe HUD overrides (placed last to win) */
+        @media (max-width: 600px) {
+            /* Ensure minimum horizontal padding including device safe-area insets */
+            body {
+                padding-left: calc(12px + env(safe-area-inset-left, 0px));
+                padding-right: calc(12px + env(safe-area-inset-right, 0px));
+            }
+
+            /* Keep the container inset from the screen edges on small devices */
+            #game-container {
+                padding-left: calc(12px + env(safe-area-inset-left, 0px));
+                padding-right: calc(12px + env(safe-area-inset-right, 0px));
+            }
+
+            /* HUD: center and add safe inset padding to avoid touching edges */
+            .hud-row {
+                padding-left: calc(8px + env(safe-area-inset-left, 0px));
+                padding-right: calc(8px + env(safe-area-inset-right, 0px));
+                gap: clamp(12px, 4vmin, 28px) !important;
+                justify-content: center !important;
+            }
+
+            /* Slightly reduce each HUD card on very narrow screens */
+            .hud-item {
+                min-width: 120px !important;
+                flex: 0 1 140px !important;
+            }
+        }
+
+        /* Extra-tight override for very narrow phones */
+        @media (max-width: 420px) {
+            .hud-row { gap: 10px !important; }
+            .hud-item { min-width: 110px !important; padding: 10px 12px !important; }
+        }
     </style>
 </head>
 <body>
