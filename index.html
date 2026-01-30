@@ -1573,6 +1573,44 @@
             .hud-row { gap: 10px !important; }
             .hud-item { min-width: 110px !important; padding: 10px 12px !important; }
         }
+        /* Small-screen layout scaling to ensure everything fits and centers */
+        @media (max-width: 600px) {
+            /* Make container full-width but inset for safe areas */
+            #game-container {
+                width: calc(100% - (24px + env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px)));
+                max-width: 100%;
+                margin-left: auto;
+                margin-right: auto;
+                --grid-size: clamp(200px, 44vmin, 300px) !important;
+                padding-top: 2vh;
+                padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px) + 12px);
+                box-sizing: border-box;
+            }
+
+            .play-area { padding: 0 12px; }
+
+            /* Scale down logo so it doesn't push content off-screen */
+            .logo {
+                width: clamp(100px, 28vmin, 220px) !important;
+                max-width: 70%;
+                height: auto;
+                margin: 6px auto;
+                display: block;
+            }
+
+            .grid-container { margin: 8px auto; }
+
+            .hud-row { justify-content: center !important; padding: 0 12px !important; }
+
+            .hud-value { font-size: clamp(18px, 4.2vmin, 26px) !important; }
+        }
+
+        @media (max-width: 360px) {
+            /* Very narrow phones: reduce grid and HUD sizes further */
+            #game-container { --grid-size: clamp(180px, 40vmin, 260px) !important; }
+            .hud-item { min-width: 100px !important; padding: 8px 10px !important; }
+            .hud-value { font-size: clamp(16px, 4vmin, 22px) !important; }
+        }
     </style>
 </head>
 <body>
