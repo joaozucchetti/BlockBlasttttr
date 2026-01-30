@@ -145,9 +145,10 @@
             #game-container {
                 width: 100%;
                 height: auto;
+                padding: 2vh 4vmin; /* Increased horizontal padding for small screens */
             }
             /* Keep badges side-by-side in a single horizontal row with horizontal scrolling if needed */
-            .hud-row { display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 1rem; overflow-x: auto; white-space: nowrap; padding: 0 6px; }
+            .hud-row { display: flex; flex-direction: row; justify-content: space-around; align-items: center; gap: 1rem; overflow-x: auto; white-space: nowrap; padding: 0 4vmin; }
             /* Let grid and play area scale to fit the width available */
             .grid-container { width: 100%; height: auto; }
         }
