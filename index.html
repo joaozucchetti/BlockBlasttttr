@@ -1851,6 +1851,8 @@
         /* pointer idle bob while waiting (slower for clearer pacing) */
         #tutorial-pointer.idle { animation: pointer-bob 2.4s ease-in-out infinite; }
         @keyframes pointer-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        /* Ensure tutorial hand never captures input and can be programmatically positioned smoothly */
+        #tutorial-pointer { pointer-events: none; user-select: none; touch-action: none; }
         .demo-cell {
             width:38px;height:38px;border-radius:50%;
             background:rgba(136,255,160,0.13);
@@ -2034,6 +2036,8 @@
             padding-right: max(clamp(8px,2vmin,16px), env(safe-area-inset-right, 0px));
             width: 100%;
             max-width: none;
+            /* Override local grid var from the base rule so landscape sizing actually applies */
+            --grid-size: clamp(220px, 48vmin, 380px);
         }
         .landscape .logo {
             width: clamp(72px, 12vmin, 140px);
@@ -2074,17 +2078,60 @@
         .landscape .dock .block-cell { width: var(--cell-size); height: var(--cell-size); }
 
         /* Extra-tight landscape (small height devices) */
-        :root.landscape-tight { --grid-size: clamp(220px, 46vmin, 380px); }
-        .landscape-tight .dock { transform: scale(0.9); transform-origin: top center; }
+        :root.landscape-tight {
+            --grid-size: clamp(200px, 44vmin, 360px);
+            --mobile-banner-height: 64px;
+            --gap: 0.8vmin;
+        }
+        .landscape-tight #game-container {
+            /* Use viewport-height aware cap so iPhone 12 (390px) fits cleanly */
+            --grid-size: clamp(200px, min(54vmin, 64vh), 320px);
+            gap: clamp(6px, 1.6vmin, 10px);
+            padding-top: max(4px, env(safe-area-inset-top, 0px));
+            padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
+        }
+        .landscape-tight .logo { width: clamp(52px, 10vmin, 100px); }
+        /* Left rail (logo + HUD + Dock stacked) */
+        .landscape-tight #left-rail {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+            width: clamp(240px, 36vmin, 360px);
+            padding-right: 6px;
+        }
+        .landscape-tight #left-rail .logo { width: clamp(96px, 18vmin, 160px); margin: 0; }
+        .landscape-tight #left-rail .hud-row { width: 100%; }
+        .landscape-tight #left-rail .stats-pill { width: 100%; justify-content: center; }
+        .landscape-tight #left-rail #dock { width: 100%; max-width: 100%; justify-content: center; }
+
+        /* Two-column canvas: left rail + play area (grid only) */
+        .landscape-tight #game-container { display: grid; grid-template-columns: clamp(240px, 36vmin, 360px) 1fr; column-gap: 14px; align-items: start; }
+        .landscape-tight #left-rail { grid-column: 1; }
+        .landscape-tight .play-area { grid-column: 2; display: flex !important; flex-direction: column; align-items: center; width: 100%; }
+        /* Side-by-side HUD + Dock under the grid in tight landscape */
+        /* Override previous side-by-side HUD|Dock inside play-area; in left-rail mode
+           play-area contains only the grid */
+        .landscape-tight .headline { display: none !important; }
+        .landscape-tight .grid-container { margin: 0 0 6px !important; }
+        .landscape-tight .stats-pill { padding: 4px 10px; gap: 8px; border-radius: 14px; }
+        .landscape-tight .stats-pill .seg-label { font-size: 10px; }
+        .landscape-tight .stats-pill .seg-value { font-size: clamp(12px, 2.2vmin, 18px); }
+        .landscape-tight .hud-item { padding: 6px 8px; min-width: 96px; max-width: 100%; }
+        .landscape-tight .hud-row { margin: 2px 0 0; }
+        .landscape-tight .dock { transform: scale(0.92); transform-origin: top right; gap: clamp(8px, 2vmin, 14px); padding: 6px 6px; }
+        .landscape-tight #tutorial-pointer { width: clamp(64px, 14vmin, 120px) !important; }
         .landscape-tight .dock.column { max-height: calc(100vh - 20px); }
         @supports (height: 100svh) {
             .landscape-tight .dock.column { max-height: calc(100svh - 20px); }
         }
 
-        /* --- Portrait tuning: spacious margins and clean stacking --- */
-        :root.portrait { --grid-size: clamp(320px, 78vw, 520px); }
+        /* --- Portrait tuning: larger grid for better playability --- */
+        :root.portrait { --grid-size: clamp(360px, 90vw, 620px); }
         @supports (height: 100svh) {
-            :root.portrait { --grid-size: min(clamp(320px, 78vw, 520px), 72svh); }
+            /* Cap by safe viewport height so it doesn't collide with banner */
+            :root.portrait { --grid-size: min(clamp(360px, 90vw, 620px), 84svh); }
         }
         @media (orientation: portrait) {
             #game-container {
@@ -2153,11 +2200,9 @@
             width: calc(var(--cell-size) * 0.8);
             height: calc(var(--cell-size) * 0.8);
         }
-        /* Ensure the grid itself scales with the viewport instead of pushing content aside */
-        .grid-container {
-            transform: scale(0.9);
-            transform-origin: center;
-        }
+        /* Avoid shrinking the grid in portrait; keep scale tweak only for narrow landscape */
+        :root.portrait .grid-container { transform: none !important; }
+        :root.landscape .grid-container { transform: scale(0.9); transform-origin: center; }
     }
 </style>
 </head>
@@ -2208,7 +2253,6 @@
         
         <!-- Ready splash overlay (shown after tutorial; click to start timer) -->
         <div id="ready-overlay" class="overlay" style="display:none;">
-            <img src="images/Logo.png" alt="HeyCash Logo" class="logo">
             <h1>Are you ready?</h1>
             <button id="ready-start-btn" class="cta-btn" aria-label="Start Game">Start</button>
         </div>
@@ -2551,6 +2595,8 @@
                 const shape = DOCK_SHAPES[Math.floor(Math.random() * DOCK_SHAPES.length)];
                 targetDock.appendChild(createBlockElement(shape));
             }
+            // After inserting, ensure the three pieces fit without being cut off
+            try { fitDockToWidth(targetDock); } catch(e){}
         }
 
         /* --- DRAG SYSTEM --- */
@@ -2724,6 +2770,7 @@
                     const newShape = DOCK_SHAPES[Math.floor(Math.random() * DOCK_SHAPES.length)];
                     const targetDockForSpawn = parentDock && parentDock.classList.contains('mobile-dock') ? parentDock : (parentDock || dockEl);
                     targetDockForSpawn.appendChild(createBlockElement(newShape));
+                    try { fitDockToWidth(targetDockForSpawn); } catch(e){}
                 } else {
                     // Reset styling
                     el.classList.remove('dragging');
@@ -3037,6 +3084,28 @@
                 if (mobileBanner) mobileBanner.style.display = 'flex';
             } catch(e) {}
         }
+        // Ensure dock content fits without clipping by scaling if necessary
+        function fitDockToWidth(dock){
+            if (!dock || dock.classList.contains('column')) return; // don't scale column mode
+            // Run after layout settles
+            requestAnimationFrame(()=>{
+                try {
+                    const contentW = dock.scrollWidth;
+                    const boxW = dock.clientWidth;
+                    let scale = 1;
+                    if (contentW > boxW) {
+                        scale = Math.max(0.90, (boxW - 6) / contentW);
+                        dock.style.transformOrigin = 'center top';
+                        dock.style.transform = 'scale(' + scale + ')';
+                    } else {
+                        // Only reset if we previously scaled from this helper
+                        if (dock.style.transform && dock.style.transform.startsWith('scale(')) {
+                            dock.style.transform = '';
+                        }
+                    }
+                } catch(e){}
+            });
+        }
         function indexToCell(r,c){ return gridEl.querySelectorAll('.cell')[r*GRID_SIZE + c]; }
         function highlightCells(r, startC, len){
             const cells = gridEl.querySelectorAll('.cell');
@@ -3099,14 +3168,29 @@
             ghost.style.transform = 'scale(0.96)';
             document.body.appendChild(ghost);
 
-            // pointer from dock to target (apply a downward offset so the large hand sits lower)
-            let handOffsetY = 0;
-            try {
-                const hr = tutorialPointer.getBoundingClientRect();
-                handOffsetY = Math.round((hr.height || 0) * 0.32);
-            } catch(e) { handOffsetY = 0; }
-            tutorialPointer.style.left = (dockRect.left + dockRect.width*0.65) + 'px';
-            tutorialPointer.style.top  = (dockRect.top + 22 + handOffsetY) + 'px';
+            // Begin: make the tutorial hand FOLLOW the ghost piece during the animation
+            // Disable hand transitions while following to avoid drift
+            const prevHandTransition = tutorialPointer.style.transition;
+            tutorialPointer.style.transition = 'none';
+            tutorialPointer.classList.remove('idle');
+            let __tutFollowRAF = 0;
+            const followPointer = () => {
+                try {
+                    const gr = ghost.getBoundingClientRect();
+                    const hr = tutorialPointer.getBoundingClientRect();
+                    const handW = hr.width || 0;
+                    const handH = hr.height || 0;
+                    // Adjusted anchor: slightly lower so finger sits on the piece
+                    // Fine-tuned: a bit more to the right and slightly up
+                    const left = gr.left + gr.width * 0.70 - handW * 0.38;
+                    const top  = gr.top  + gr.height * 0.92 - handH * 0.33;
+                    tutorialPointer.style.left = Math.round(left) + 'px';
+                    tutorialPointer.style.top  = Math.round(top)  + 'px';
+                } catch(e) {}
+                __tutFollowRAF = requestAnimationFrame(followPointer);
+            };
+            // prime once so it snaps to the starting position, then animate every frame
+            followPointer();
 
             await delay(600);
             const targetLeft = gridRect.left + padding + targetCol*total;
@@ -3115,9 +3199,11 @@
             ghost.style.transform = 'scale(1.02)';
             ghost.style.left = `${targetLeft}px`;
             ghost.style.top  = `${targetTop}px`;
-            tutorialPointer.style.left = (targetLeft + cols*cellSize - 8) + 'px';
-            tutorialPointer.style.top  = (targetTop + rows*cellSize + 12 + handOffsetY) + 'px';
             await delay(1600);
+            // Stop following once the ghost finishes its move
+            try { cancelAnimationFrame(__tutFollowRAF); } catch(e) {}
+            tutorialPointer.classList.add('idle');
+            // keep hand transition off for the rest of the tutorial to prevent overshoot
             // settle
             ghost.style.transform = 'scale(1)';
             clearHighlightsReal();
@@ -3126,6 +3212,8 @@
             ghost.style.opacity = '0';
             await delay(360);
             ghost.remove();
+            // restore previous transition just in case (not strictly necessary during tutorial)
+            tutorialPointer.style.transition = prevHandTransition;
         }
 
         function startTutorial() {
@@ -3458,17 +3546,53 @@
 
                 try {
                     var dock = document.getElementById('dock');
+                    var game = document.getElementById('game-container');
+                    var play = game ? game.querySelector('.play-area') : null;
+                    var hud = play ? play.querySelector('.hud-row') : null;
+                    var logo = game ? game.querySelector('.logo') : null;
+                    var leftRail = document.getElementById('left-rail');
+                    if (!leftRail && game) { leftRail = document.createElement('div'); leftRail.id = 'left-rail'; }
                     if (dock) {
-                        // Default: horizontal dock in landscape, vertical only when height is tight
-                        if (isLandscape && tight) dock.classList.add('column'); else dock.classList.remove('column');
-                        if (isLandscape && tight) dock.style.transform = 'scale(0.9)'; else dock.style.transform = '';
-                        // Portrait: ensure dock is horizontal, full width of grid
-                        if (!isLandscape) {
+                        // Keep dock horizontal; in tight landscape it sits beside the HUD
+                        dock.classList.remove('column');
+                        if (isLandscape && tight) dock.style.transform = 'scale(0.92)'; else dock.style.transform = '';
+                        // Portrait or non-tight: ensure default flow
+                        if (!isLandscape || !tight) {
                             dock.classList.remove('column');
                             dock.style.transform = '';
                         }
+                        // Refit dock content to avoid clipping after orientation changes
+                        try { fitDockToWidth(dock); } catch(e){}
+                    }
+                    // Move HUD and Dock to the left rail under the logo in tight landscape
+                    if (game && play && hud && dock && logo) {
+                        if (isLandscape && tight) {
+                            if (!leftRail.parentElement) { game.insertBefore(leftRail, play); }
+                            if (logo.parentElement !== leftRail) leftRail.appendChild(logo);
+                            if (hud.parentElement !== leftRail) leftRail.appendChild(hud);
+                            if (dock.parentElement !== leftRail) leftRail.appendChild(dock);
+                        } else {
+                            // Restore DOM order: logo then play-area (hud and dock back inside play-area)
+                            if (leftRail && leftRail.parentElement) {
+                                if (logo && logo.parentElement === leftRail) game.insertBefore(logo, game.firstChild);
+                                if (hud && hud.parentElement === leftRail && play) play.insertBefore(hud, play.firstChild);
+                                if (dock && dock.parentElement === leftRail && play) play.appendChild(dock);
+                                try { leftRail.remove(); } catch(e){}
+                            }
+                        }
                     }
                 } catch (e) {}
+
+                // Toggle bottom banner in tight landscape to free vertical space
+                try {
+                    var banner = document.getElementById('mobile-banner');
+                    if (banner) {
+                        if (isLandscape && tight) banner.style.display = 'none'; else banner.style.display = 'flex';
+                    }
+                } catch(e){}
+
+                // Dynamically size grid to available height on devices like iPhone 12 landscape
+                try { updateLandscapeGridSize(isLandscape, tight); } catch(e){}
 
                 try { checkAndToggleBanner(); } catch(e){}
                 try { squeezeToFit(); } catch(e){}
@@ -3521,6 +3645,27 @@
                     container.style.transform = 'scale(' + scaleL + ')';
                 }
             }
+        }
+
+        // Compute a grid size that fits remaining height (esp. iPhone 12 landscape)
+        function updateLandscapeGridSize(isLandscape, tight){
+            if (!isLandscape) return; // only run in landscape
+            var root = document.documentElement;
+            var banner = document.getElementById('mobile-banner');
+            var bannerH = 0;
+            try { if (banner && getComputedStyle(banner).display !== 'none') bannerH = banner.getBoundingClientRect().height || 0; } catch(e){}
+            var safeTop = 0, safeBottom = 0;
+            try {
+                var cs = getComputedStyle(root);
+                safeTop = parseFloat(cs.getPropertyValue('--safe-top') || '0') || 0;
+            } catch(e){}
+            // Reserve space for HUD + gaps + dock in landscape
+            var reserved = tight ? 118 : 172;
+            var avail = Math.max(160, (window.innerHeight || 0) - bannerH - safeTop - reserved);
+            // clamp with width so it doesn't exceed horizontal visual
+            var maxByWidth = Math.max(180, Math.min(420, Math.floor((window.innerWidth || 0) * 0.42)));
+            var size = Math.max(180, Math.min(Math.min(avail, maxByWidth), 380));
+            root.style.setProperty('--grid-size', size + 'px');
         }
 
         // Ready splash: show after tutorial; start game on click
