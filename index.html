@@ -17,7 +17,7 @@
         /* --- CSS STYLES --- */
         :root {
             --bg-color: #00c853;
-            --mobile-banner-height: 120px; /* central source of truth for banner + safe spacing */
+            --mobile-banner-height: 80px; /* central source of truth for banner + safe spacing */
             --grid-bg: rgba(255,255,255,0.06);
             --cell-bg: rgba(255,255,255,0.06);
             --text-color: #072014;
@@ -64,7 +64,7 @@
     align-items: center;
     /* FIX: Center vertically to remove the big gap at the bottom */
     justify-content: center; 
-    width: 90%;
+    width: 80%;
     height: auto;
     max-height: calc(100vh - var(--mobile-banner-height) - env(safe-area-inset-top, 0px));
     margin: 0 auto;
@@ -104,7 +104,7 @@
         /* Logo styling */
         .logo {
             width: min(20vmin, 100px);
-            max-width: 90%;
+            max-width: 50%;
             height: auto;
             object-fit: contain;
             animation: bounce-in 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -421,23 +421,31 @@
             100% { transform: scale(0); opacity: 0; }
         }
 
-        /* The DOCK: show pieces in a single horizontal row by default (all screens) */
+        /* The DOCK: visible holder for the 3 puzzle pieces */
         .dock {
             display: flex;
             flex-direction: row; /* force row as the default */
             align-items: center;
             justify-content: space-between; /* spread the 3 pieces */
-            gap: clamp(20px, 4vmin, 36px);
+            gap: clamp(14px, 3.2vmin, 28px);
             height: auto;
             width: var(--grid-size); /* match grid width */
             max-width: var(--grid-size);
-            z-index: 10;
+            z-index: 3700; /* sit above the bottom banner */
+            position: relative;
             flex-wrap: nowrap;
             overflow-x: auto; /* enable horizontal scroll on narrow screens */
             -webkit-overflow-scrolling: touch;
-            margin-top: 0;
-            padding: 6px 0;
-            animation: fade-slide-in 0.8s ease-out 0.4s backwards;
+            margin-top: 8px;
+            padding: 12px 12px;
+            box-sizing: border-box;
+            animation: fade-slide-in 0.8s ease-out 0.2s backwards;
+            /* rounded frosted panel behind the pieces */
+            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.28);
+            backdrop-filter: blur(10px) saturate(1.05);
+            border: 1px solid rgba(255,255,255,0.04);
         }
 
         .block-shape {
@@ -465,6 +473,9 @@
             margin: 0;
             background-color: transparent;
         }
+
+        /* Slight inset behind each block to make dock read as a container */
+        .dock .block-shape { padding: 6px; border-radius: 12px; background: transparent; }
 
         /* fallback for other contexts */
         .block-cell {
@@ -669,7 +680,7 @@
             display: flex;
             justify-content: space-around; /* Evenly distribute items with space around them */
             align-items: center;
-            gap: clamp(20px, 4vmin, 40px); /* Increased responsive gap */
+            gap: clamp(12px, 3vmin, 24px); /* Slightly reduced responsive gap to save vertical space */
             width: 100%; /* Take full width of parent (.play-area) */
             max-width: 100%;
             padding: 0; /* Padding is now on .play-area */
@@ -682,17 +693,17 @@
         .hud-item {
             position: relative;
             /* slightly darker base */
-            background: linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.16));
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.489), rgba(0, 0, 0, 0.331));
             border: 1px solid rgba(0,0,0,0.18);
             border-radius: 14px;
-            padding: 12px 20px;
+            padding: 8px 12px;
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 8px;
             /* allow cards to grow/shrink based on available space */
-            flex: 1 1 180px; /* Base width of 180px, can grow/shrink */
-            min-width: 150px; /* Smallest reasonable width for a HUD item */
-            max-width: 300px; /* Cap maximum width */
+            flex: 1 1 140px; /* Base width reduced to save space */
+            min-width: 120px; /* Slightly smaller minimum */
+            max-width: 220px; /* Slightly smaller maximum */
             /* softened shadow to reduce visual weight */
             box-shadow: 0 8px 18px rgba(0, 0, 0, 0.087), inset 0 1px 0 rgba(255,255,255,0.01);
             backdrop-filter: blur(6px) saturate(1.05);
@@ -701,8 +712,8 @@
         }
 
         /* Ensure label/value text truncates instead of pushing layout */
-        .hud-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.05; min-width: 0; overflow: hidden; }
-        .hud-value { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .hud-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.02; min-width: 0; overflow: hidden; }
+        .hud-value { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 800; }
             
 
         .card-stack {
@@ -1621,15 +1632,15 @@
         .headline .line2 { color: #00e676; font-weight: 900; font-size: clamp(22px, 6.2vmin, 28px); text-shadow: 0 3px 8px rgba(0,0,0,0.45); }
 
         /* Compact HUD (smaller, no icons) */
-        .hud-item.compact { flex: 0 0 auto; padding: 8px 14px; gap: 6px; min-width: clamp(150px, 26vmin, 200px); border-radius: 12px; min-height: 48px; }
+        .hud-item.compact { flex: 0 0 auto; padding: 6px 10px; gap: 6px; min-width: clamp(130px, 24vmin, 190px); border-radius: 10px; min-height: 40px; }
         .hud-item.compact .hud-label { font-size: 10px; margin-bottom: 0; opacity: 0.9; }
-        .hud-item.compact .hud-value { font-size: clamp(20px, 3.6vmin, 28px); }
+        .hud-item.compact .hud-value { font-size: clamp(18px, 3.2vmin, 24px); }
         /* Ensure both values use identical sizing and no extra animations */
-        .hud-item .hud-value#timer, .hud-item .hud-value#score { font-size: clamp(20px, 3.6vmin, 28px) !important; animation: none !important; }
+        .hud-item .hud-value#timer, .hud-item .hud-value#score { font-size: clamp(18px, 3.2vmin, 24px) !important; animation: none !important; }
 
         /* Square HUD cards: equal width/height, stacked label/value */
         .hud-item.square {
-            --hud-size: clamp(68px, 11vmin, 96px);
+            --hud-size: clamp(56px, 10vmin, 80px);
             width: var(--hud-size);
             height: var(--hud-size);
             border-radius: 30px;
@@ -1644,7 +1655,7 @@
         }
         .hud-item.square .hud-text { align-items: center; text-align: center; }
         .hud-item.square .hud-label { font-size: 10px; letter-spacing: 0.6px; }
-        .hud-item.square .hud-value { font-size: clamp(16px, 3.2vmin, 22px); }
+        .hud-item.square .hud-value { font-size: clamp(14px, 3vmin, 20px); }
 
         /* Tutorial micro-animations */
         .tutorial-floats { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
@@ -1659,7 +1670,7 @@
         }
         .tutorial-banner {
             left: 50%; top: 50%; transform: translate(-50%, -50%);
-            background: #3ccc65c3;
+            background: #3ccc65d8;
             color: #0b2117;
             font-weight: 900;
             font-size: clamp(18px, 3.6vmin, 28px);
@@ -1904,7 +1915,7 @@
             <button id="tutorial-cta" onclick="tutorialNextStep()" style="margin-top:44px;font-size:clamp(22px,5vw,26px);background:linear-gradient(90deg,#01e991 80%,#38ff4f 110%);border:none;border-radius:2em;letter-spacing:1.2px;font-weight:900;color:#175e35;box-shadow:0 10px 40px #14e35b32;padding:20px 54px;cursor:pointer;display:none;">Start Playing</button>
         </div>
         <div id="game-container">
-        <img src="images/Logo.png" alt="HeyCash Logo" class="logo" style="width: clamp(420px, 40vmin, 700px); max-width: 70%; height: auto;">
+        <img src="images/Logo.png" alt="HeyCash Logo" class="logo" style="width: clamp(420px, 40vmin, 700px); max-width: 60%; height: auto;">
         
         <div class="play-area">
             <div class="headline">
@@ -2936,7 +2947,7 @@
                 });
             }
 
-            const MIN_DIST = isMobile ? 10 : 8; // wider spacing on small screens
+            const MIN_DIST = isMobile ? 6 : 6; // allow denser clusters on all screens
             const MAX_TRIES = 14;
             const pickLeft = () => {
                 let best = null, bestGap = -1;
@@ -2951,7 +2962,7 @@
             };
 
             const spawnFloat = () => {
-                const isCoin = Math.random() < 0.65;
+                const isCoin = Math.random() < 0.8; // favor coins for visual density
                 const el = document.createElement('div');
                 el.className = 'float ' + (isCoin ? 'coin' : 'dollar');
                 if (!isCoin) el.textContent = '$';
@@ -2961,21 +2972,23 @@
                 window.__bgActivePositions.push(left);
 
                 if (isCoin) {
-                    const size = (isMobile ? 16 : 20) + Math.random() * (isMobile ? 18 : 28);
+                    const base = isMobile ? 18 : 24;
+                    const size = base + Math.random() * (isMobile ? 22 : 36);
                     el.style.width = size + 'px';
                     el.style.height = size + 'px';
+                    el.style.opacity = isMobile ? 0.22 : 0.28;
                 } else {
                     el.style.fontSize = (16 + Math.random() * 18) + 'px';
                     el.style.opacity = isMobile ? 0.18 : 0.22;
                 }
 
-                const dur = (isMobile ? 16 : 22) + Math.random() * (isMobile ? 10 : 16);
+                const dur = (isMobile ? 14 : 20) + Math.random() * (isMobile ? 8 : 14);
                 el.style.animationDuration = dur + 's';
                 el.style.animationDelay = (-Math.random() * dur) + 's';
                 host.appendChild(el);
 
                 // add occasional gentle sway to make motion feel organic
-                if (Math.random() < 0.7) el.classList.add('sway');
+                if (Math.random() < 0.85) el.classList.add('sway');
 
                 setTimeout(() => {
                     const val = parseFloat(el.dataset.left || 'NaN');
@@ -2987,14 +3000,16 @@
                 }, (dur + 2) * 1000);
             };
 
-            const seedCount = isMobile ? 8 : 14;
+            const seedCount = isMobile ? 14 : 28; // start with more floats
             for (let i = 0; i < seedCount; i++) spawnFloat();
 
             clearInterval(window.__bgFloatTimer);
             window.__bgFloatTimer = setInterval(() => {
                 if (document.hidden) return;
-                spawnFloat();
-            }, isMobile ? 1600 : 1100);
+                // sometimes spawn a small burst for livelier background
+                const burst = Math.random() < 0.25 ? (1 + Math.floor(Math.random() * 3)) : 1;
+                for (let b = 0; b < burst; b++) spawnFloat();
+            }, isMobile ? 900 : 700);
         }
 
         // Prepare tutorial assets while loading so the demo runs without hiccups
