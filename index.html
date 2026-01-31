@@ -123,6 +123,15 @@
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
 
+        /* Runtime short-screen classes applied by JS (for devices like iPhone SE) */
+        :root.short-screen .logo { width: clamp(44px, 11vmin, 76px); }
+        :root.very-short-screen .logo { width: clamp(36px, 10vmin, 64px); }
+        :root.short-screen #game-container { padding-top: calc(3vh + env(safe-area-inset-top, 0px)); }
+        :root.very-short-screen #game-container { padding-top: calc(2vh + env(safe-area-inset-top, 0px)); }
+        :root.short-screen { --grid-size: clamp(260px, 38vmin, 320px); }
+        :root.very-short-screen { --grid-size: clamp(220px, 34vmin, 280px); }
+        :root.very-short-screen #tutorial-pointer { width: clamp(36px, 14vmin, 96px) !important; }
+
         /* Install CTA styling */
         .install-cta {
             width: 160px; /* Increase button size */
@@ -3068,6 +3077,24 @@
             clearInterval(window.__tutFloatTimer);
             window.__tutFloatTimer = setInterval(()=>{ if (document.hidden) return; spawn(); }, isMobile?1400:1200);
         }
+    </script>
+
+    <script>
+        // Runtime adjustments for very short viewports (e.g., iPhone SE) to avoid cropping
+        (function(){
+            const shortCls = 'short-screen';
+            const veryShortCls = 'very-short-screen';
+            function applyClasses(){
+                const h = window.innerHeight || document.documentElement.clientHeight;
+                document.documentElement.classList.remove(shortCls, veryShortCls);
+                if (h <= 568) document.documentElement.classList.add(veryShortCls);
+                else if (h <= 640) document.documentElement.classList.add(shortCls);
+            }
+            window.addEventListener('resize', applyClasses);
+            window.addEventListener('orientationchange', applyClasses);
+            // apply on load
+            applyClasses();
+        })();
     </script>
 
     <div class="hey-banner" onclick="installApp()">
