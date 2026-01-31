@@ -7,12 +7,7 @@
         html, body {
             zoom: 1 !important;
             height: 100%;
-            /* SCROLL LOCK: prevent page scrolling on most devices to keep game fixed */
-            overflow: hidden;
-        }
-        /* Exception: allow scrolling on small/tall mobile screens so the top UI isn't cropped */
-        @media (max-width: 420px), (max-height: 720px) {
-            html, body { overflow: auto; }
+            overflow: hidden; /* disable page scrolling */
         }
     </style>
     <title>HeyCash!</title>
@@ -36,8 +31,7 @@
             padding: 0;
             overflow: hidden;
             width: 100vw;
-            /* prefer flexible height to avoid mobile browser chrome cropping */
-            min-height: calc(100vh - env(safe-area-inset-top, 0px));
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -68,12 +62,11 @@
         align-items: center;
         /* FIX: Center vertically to remove the big gap at the bottom */
         justify-content: center; 
-        width: 80%;
-        /* Avoid using strict 100vh which can be cropped on mobile; respect safe-area */
-        min-height: calc(100vh - env(safe-area-inset-top, 0px));
+        width: 90%;
+        height: 100vh;
         margin: 0 auto;
-        /* Use flexible vertical padding; safe-area top inset applied only on small screens below */
-        padding: 2vh 10px 2vh 10px;
+        /* FIX: Use flexible vertical padding (vh) so it doesn't get stuck */
+        padding: 2vh 10px; 
         
         /* expose grid sizing variables so dock items can match grid cell size */
         --grid-size: clamp(300px, 45vmin, 380px);
@@ -84,16 +77,6 @@
         position: relative;
         z-index: 1;
         overflow: hidden; /* disable container scrolling */
-    }
-
-    /* Prefer dynamic viewport units on supporting browsers to avoid mobile chrome cropping */
-    @supports (height: 100svh) or (height: 100dvh) {
-        @supports (height: 100svh) {
-            #game-container { height: 100svh; min-height: calc(100svh - env(safe-area-inset-top, 0px)); }
-        }
-        @supports (height: 100dvh) and not (height: 100svh) {
-            #game-container { height: 100dvh; min-height: calc(100dvh - env(safe-area-inset-top, 0px)); }
-        }
     }
 
         @media (orientation: landscape) {
@@ -123,20 +106,6 @@
             object-fit: contain;
             animation: bounce-in 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             margin-bottom: 0;
-        }
-
-        /* Ensure logo has no top margin by default */
-        .logo { margin-top: 0 !important; }
-
-        /* Responsive logo clamp for very small viewports to avoid top cropping */
-        @media (max-width: 420px), (max-height: 720px) {
-            .logo {
-                width: clamp(48px, 12vmin, 80px);
-                margin-top: env(safe-area-inset-top, 6px);
-            }
-            /* also reduce the tutorial hand and top padding on phones */
-            #tutorial-pointer { width: clamp(48px, 18vmin, 140px) !important; }
-            #game-container { padding-top: calc(4vh + env(safe-area-inset-top, 0px)); }
         }
 
         /* Larger logo on start and game-over screens */
