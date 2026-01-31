@@ -16,7 +16,7 @@
     <title>HeyCash!</title>
     <link href="https://fonts.googleapis.com/css2?family=Mona+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS STYLES --- */
+        
         :root {
             --bg-color: #00c853;
             --mobile-banner-height: 80px; /* central source of truth for banner + safe spacing */
@@ -28,14 +28,14 @@
             /* Reserve extra space at top for camera notch in portrait */
             --notch-reserve: 40px;
         }
-        /* Shrink logo and move HUD/dock to side ONLY for mid-width AND short-height screens */
+        
         @media (min-width: 600px) and (max-width: 1219px) and (max-height: 600px) {
             #game-container > .logo {
                 width: clamp(60px, 12vw, 120px) !important;
                 max-width: 22vw !important;
                 margin-bottom: 0 !important;
             }
-            /* Side-stack: move HUD and dock to the right of the grid */
+            
             .play-area {
                 flex-direction: row;
                 align-items: flex-start;
@@ -124,7 +124,7 @@
         }
 
         @media (orientation: landscape) {
-            /* Landscape: arrange content horizontally for wider viewports */
+            
             #game-container {
                 max-width: 100%;
                 width: 100%;
@@ -135,7 +135,7 @@
                 padding: calc(1vh + env(safe-area-inset-top, 6px)) 12px;
             }
 
-            /* Let play-area expand while keeping the grid constrained by --grid-size */
+            
             .play-area {
                 flex: 1 1 auto;
                 max-width: calc(100% - 320px);
@@ -144,7 +144,7 @@
                 gap: 8px;
             }
 
-            /* Smaller left-aligned logo in landscape */
+            
             .logo {
                 width: clamp(80px, 12vmin, 160px);
                 height: auto;
@@ -153,28 +153,28 @@
                 align-self: flex-start;
             }
 
-            /* Stack HUD and dock vertically to the right of the play-area */
+            
             .hud-row { order: 2; margin-bottom: 6px; }
             .dock { order: 3; margin-top: 6px; align-self: flex-end; }
 
-            /* Ensure grid scales properly in landscape by capping grid-size relative to viewport height */
+            
             :root { --grid-size: clamp(180px, 50vmin, 420px); }
         }
 .dock {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
-    /* FIX: allow horizontal scrolling on narrow screens while keeping vertical visuals visible */
+    
     overflow-x: auto;
     overflow-y: visible;
     position: relative;
     z-index: 900;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
+    
 .dock::-webkit-scrollbar {
     display: none;
 }
-        /* Logo styling */
+        
         .logo {
             width: min(20vmin, 100px);
             max-width: 50%;
@@ -184,7 +184,7 @@
             margin-bottom: 0;
         }
 
-        /* Larger logo on start and game-over screens */
+        
         #start-screen .logo,
         #game-over .logo {
             width: clamp(220px, 45vmin, 550px);
@@ -199,17 +199,17 @@
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        /* Runtime short-screen classes applied by JS (for devices like iPhone SE) */
+        
         :root.short-screen .logo { width: clamp(44px, 11vmin, 76px); }
         :root.very-short-screen .logo { width: clamp(36px, 10vmin, 64px); }
-        /* Slightly lower padding for short/very-short screens to keep logo closer to top */
+        
         :root.short-screen #game-container { padding-top: calc(2vh + env(safe-area-inset-top, 0px)); }
         :root.very-short-screen #game-container { padding-top: calc(1vh + env(safe-area-inset-top, 0px)); }
         :root.short-screen { --grid-size: clamp(260px, 38vmin, 320px); }
         :root.very-short-screen { --grid-size: clamp(220px, 34vmin, 280px); }
         :root.very-short-screen #tutorial-pointer { width: clamp(36px, 14vmin, 96px) !important; }
 
-        /* Install CTA styling */
+        
         .install-cta {
             width: 160px; /* Increase button size */
             height: auto; /* Maintain aspect ratio */
@@ -227,7 +227,7 @@
             z-index: 20;
         }
 
-        /* Hide inline install-cta on small screens; mobile banner provides install CTA */
+        
         @media (max-width: 480px) {
             .install-cta { display: none; }
             #game-container {
@@ -235,9 +235,9 @@
                 height: auto;
                 padding: 2vh 4vmin; /* Increased horizontal padding for small screens */
             }
-            /* Keep badges side-by-side in a single horizontal row with horizontal scrolling if needed */
+            
             .hud-row { display: flex; flex-direction: row; justify-content: space-around; align-items: center; gap: 1rem; overflow-x: auto; white-space: nowrap; padding: 0 4vmin; }
-            /* Let grid and play area scale to fit the width available */
+            
             .grid-container { width: 100%; height: auto; }
         }
         
@@ -1330,24 +1330,7 @@
                 transform-origin: top center;
             }
         }
-    <script>
-    // Desktop: scale down game container if grid + dock would overflow viewport height
-    function clampDesktopScale() {
-        // Lower the minHeight so scaling starts sooner, and allow a smaller grid
-        var minHeight = 700; // Minimum height needed for grid + dock + HUD + margins (more aggressive)
-        var container = document.getElementById('game-container');
-        if (!container) return;
-        var avail = window.innerHeight - 12;
-        var scale = 1;
-        if (window.innerWidth >= 768 && avail < minHeight) {
-            scale = Math.max(0.44, avail / minHeight); // allow more aggressive scaling
-        }
-        container.style.setProperty('--desktop-scale', scale);
-    }
-    window.addEventListener('resize', clampDesktopScale);
-    document.addEventListener('DOMContentLoaded', clampDesktopScale);
-    setTimeout(clampDesktopScale, 80);
-    </script>
+
 
         /* Ensure HUD stays side-by-side on wider viewports */
         @media (min-width: 700px) {
@@ -1397,7 +1380,7 @@
         }
 
         /* Tablet/Mid screens (600–1219px): keep central stacked layout and bottom banner */
-        @media (min-width: 600px) and (max-width: 1219px) {
+        @media (min-width: 600px) and (max-width: 800px) {
             #game-container {
                 --grid-size: min(54vmin, 412px);
                 max-width: 600px;
@@ -1411,7 +1394,7 @@
             }
 
             /* Scale down the whole container if it would overflow horizontally or vertically */
-            @media (max-width: 900px), (max-height: 600px) {
+            @media (max-width: 800px), (max-height: 600px) {
                 #game-container {
                     /* Compute scale based on available width/height */
                     transform: scale(calc(min((100vw - 32px) / (var(--grid-size) + 32), (100vh - 180px) / (var(--grid-size) + 180), 1)));
@@ -1431,8 +1414,7 @@
             .mobile-banner .mobile-dock { display: flex; }
         }
 
-        /* Wide screens (1220–1699px): still use bottom banner; keep centered stack */
-        @media (min-width: 1020px) and (max-width: 2000px) {
+        @media (min-width:800px) and (max-width: 2000px) {
             #game-container {
                 --grid-size: clamp(320px, 20vmin, 580px);
                 padding-top: calc(1.2vh + env(safe-area-inset-top, 0px));
@@ -1450,14 +1432,8 @@
             .mobile-banner .mobile-dock { display: flex; }
         }
 
-        /* Floating desktop install button (for cases where bottom banner is hidden or covered) */
-        /* Disable floating desktop install button; banner handles CTA at game over */
         .desktop-install-cta { display: none !important; }
 
-        /* If you need the dock to always stack vertically, add the `column` class
-           to the dock element: <div class="dock column" id="dock">. This rule
-           forces a vertical, scrollable column even on desktop (overrides
-           media-query horizontal rules). */
         .dock.column {
             flex-direction: column !important;
             flex-wrap: nowrap !important;
@@ -1478,7 +1454,6 @@
             height: calc(var(--cell-size) * 0.86) !important;
         }
 
-        /* REDESIGN START SCREEN STYLES */
         .redesign-start {
             background: 
                 radial-gradient(circle at center, #1b5e20 0%, #05190b 100%),
@@ -1487,7 +1462,7 @@
             background-size: 100% 100%, 40px 40px, 40px 40px !important;
             background-position: center center !important;
             backdrop-filter: none !important;
-            overflow: hidden; /* Ensure decorations don't cause scroll */
+            overflow: hidden; 
         }
 
         .decor-block {
@@ -1504,7 +1479,6 @@
             border-radius: 4px;
             box-shadow: none;
         }
-        /* Positions */
         .decor-1 { top: 15%; left: 8%; animation: float-1 6s infinite ease-in-out; }
         .decor-2 { bottom: 20%; right: 8%; animation: float-2 7s infinite ease-in-out; }
         .decor-3 { top: 25%; right: 15%; animation: float-3 8s infinite ease-in-out; }
@@ -1519,7 +1493,6 @@
         @keyframes float-5 { 0%,100%{transform:translateY(0) rotate(45deg);} 50%{transform:translateY(-12px) rotate(30deg);} }
         @keyframes float-6 { 0%,100%{transform:translateY(0) rotate(-20deg);} 50%{transform:translateY(-18px) rotate(-10deg);} }
 
-        /* Gift-card stack (start screen) */
         .gift-stack {
             position: absolute;
             top: 12%;
@@ -1527,7 +1500,7 @@
             transform: translateX(-50%);
             width: clamp(140px, 28vmin, 340px);
             height: auto;
-            z-index: 0; /* sits behind logo */
+            z-index: 0;
             pointer-events: none;
         }
 
@@ -1579,18 +1552,15 @@
             font-size: clamp(14px, 3vmin, 20px);
         }
 
-        /* Individual cards: stacking, rotation and color gradients */
         .gift-card.g1 { z-index: 3; transform: translateX(-8%) translateY(0) rotate(-8deg) scale(1); left: 50%; background: linear-gradient(135deg,#00c853,#00e676); }
         .gift-card.g2 { z-index: 2; transform: translateX(-50%) translateY(10px) rotate(-2deg) scale(0.98); left: 50%; background: linear-gradient(135deg,#0056b3,#1e88e5); }
         .gift-card.g3 { z-index: 1; transform: translateX(-92%) translateY(22px) rotate(6deg) scale(0.96); left: 50%; background: linear-gradient(135deg,#ff9900,#ffb74d); }
 
-        /* Subtle float to bring life */
         @keyframes card-drift { 0% { transform: translateY(0) } 50% { transform: translateY(-6px) } 100% { transform: translateY(0) } }
         .gift-card.g1 { animation: card-drift 6s ease-in-out infinite; }
         .gift-card.g2 { animation: card-drift 7s ease-in-out infinite; }
         .gift-card.g3 { animation: card-drift 8s ease-in-out infinite; }
 
-        /* Make sure logo sits above the stack */
         .redesign-start .logo { position: relative; z-index: 2; width: clamp(200px, 40vmin, 280px); margin-bottom: 20px; }
 
         .game-title {
