@@ -48,9 +48,8 @@
             content: "";
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: url('images/greenbg.png') no-repeat center center fixed;
+            background: url('images/HC-bg.png') no-repeat center center fixed;
             background-size: cover;
-            filter: saturate(0.9) brightness(0.8);
             z-index: -1;
             pointer-events: none;
         }
@@ -279,14 +278,16 @@
         /* THE GRID */
         .grid-container {
             display: grid;
-            /* use explicit cell-size so dock blocks can match grid cells */
             grid-template-columns: repeat(8, var(--cell-size));
             grid-template-rows: repeat(8, var(--cell-size));
-            gap: var(--gap);
-            background-color: var(--grid-bg);
-            padding: var(--gap);
-            border-radius: 10px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            gap: calc(var(--gap) * 1.18);
+            background: rgba(0,0,0,0.18); /* much more visible background */
+            padding: calc(var(--gap) * 1.5);
+            border-radius: 40px;
+            box-shadow:
+                0 16px 60px 0 rgba(0,64,47,0.22),
+                0 1px 35px 3px #43ff9525 inset;
+            outline: none;
             width: var(--grid-size);
             height: var(--grid-size);
             aspect-ratio: 1 / 1;
@@ -294,6 +295,9 @@
             animation: slide-up 0.8s ease-out 0.3s backwards;
             margin: clamp(0.3rem, 0.5vmin, 0.8rem) auto;
         }
+
+        /* spacing for HUD above grid */
+        .hud-row { margin-bottom: 8px; }
 
         /* Play area wrapper to keep grid, CTA and dock centered as a group */
         .play-area {
@@ -353,22 +357,46 @@
         .cell {
             width: 100%;
             height: 100%;
-            background-color: var(--cell-bg);
-            border-radius: 7px;
+            background-color: transparent;
+            border-radius: 50%;
             background-size: cover;
-            box-shadow: inset 0 1px 2px rgba(255,255,255,0.1), inset 0 -1px 2px rgba(0,0,0,0.2);
-            transition: transform 0.15s ease;
+            box-shadow: 0 0 0px 0 #0000, 0 0 0px 0 #0000;
+            transition: transform 0.15s ease, box-shadow 0.2s;
+            position: relative;
+        }
+        .cell:after {
+            content: "";
+            position: absolute;
+            top: 6.5%; left: 6.5%; right: 6.5%; bottom: 6.5%;
+            border-radius: 50%;
+            /* Glossy, light well with subtle sheen (not fully solid) */
+            background:
+                linear-gradient(150deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.18) 32%, rgba(255,255,255,0) 33%),
+                radial-gradient(65% 65% at 50% 45%, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.88) 55%, rgba(255,255,255,0.22) 100%);
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.55) inset,
+                0 0 0.55vmin 0.35vmin rgba(255,255,255,0.28) inset,
+                0 2px 8px rgba(0,0,0,0.12);
+            border: 1px solid rgba(255,255,255,0.32);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .cell.has-coin:after {
+            background: none !important;
+            box-shadow: none !important;
+            border: none !important;
         }
 
         .cell.highlight {
-            outline: 3px solid rgba(255,255,255,0.25);
-            box-shadow: 0 0 18px rgba(0,200,120,0.2) inset;
-            background-color: rgba(255,255,255,0.04);
+            outline: 3px solid #afffc8;
+            box-shadow: 0 0 22px 6px #37e49176;
+            background-color: rgba(255,255,255,0.05);
         }
 
         .cell:hover {
-            transform: scale(1.05);
-            filter: brightness(1.2);
+            transform: scale(1.06);
+            filter: brightness(1.12);
+            box-shadow: 0 0 32px 13px #36ffd280;
         }
 
         .cell.clearing {
@@ -385,11 +413,11 @@
             display: flex;
             flex-direction: row; /* force row as the default */
             align-items: center;
-            justify-content: center;
-            gap: 12px;
+            justify-content: space-between; /* spread the 3 pieces */
+            gap: clamp(20px, 4vmin, 36px);
             height: auto;
-            width: 100%;
-            max-width: 820px; /* allow multiple pieces to sit side-by-side */
+            width: var(--grid-size); /* match grid width */
+            max-width: var(--grid-size);
             z-index: 10;
             flex-wrap: nowrap;
             overflow-x: auto; /* enable horizontal scroll on narrow screens */
@@ -417,21 +445,23 @@
         .dock .block-cell {
             width: var(--cell-size);
             height: var(--cell-size);
-            border-radius: 6px;
+            border-radius: 50%;
             pointer-events: none;
             background-size: cover;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.12);
-            margin: 0; /* reset any extra spacing — dock gap will control spacing */
+            box-shadow: 0 6px 20px 5px rgba(0,255,128,0.09), 0 0 10px 0 rgba(0,0,0,0.14) inset;
+            margin: 0;
+            background-color: transparent;
         }
 
         /* fallback for other contexts */
         .block-cell {
             width: clamp(18px, 3.2vmin, 28px);
             height: clamp(18px, 3.2vmin, 28px);
-            border-radius: 4px;
+            border-radius: 50%;
             pointer-events: none;
             background-size: cover;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+            background-color: transparent;
+            box-shadow: 0 4px 15px rgba(0,255,128,0.10), 0 0 6px 0 rgba(0,0,0,0.11) inset;
         }
 
         /* Dragging State */
@@ -730,19 +760,23 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 90px;
-            background: #ffffff; /* white bottom */
-            border-top-left-radius: 30px;
-            border-top-right-radius: 30px;
+            height: 82px; /* slightly smaller for discreteness */
+            background: rgba(255, 255, 255, 0.654); /* subtle glass */
+            backdrop-filter: blur(8px) saturate(1.05);
+            -webkit-backdrop-filter: blur(8px) saturate(1.05);
+            border-top-left-radius: 26px;
+            border-top-right-radius: 26px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            padding: 14px 16px;
+            padding: 12px 14px;
             box-sizing: border-box;
             z-index: 3500;
-            box-shadow: 0 -8px 30px rgba(0,0,0,0.08);
-            color: #072014;
+            box-shadow: 0 -6px 18px rgba(0,0,0,0.06);
+            border-top: 1px solid rgba(255,255,255,0.06);
+            color: rgba(7,32,20,0.95);
+            transition: opacity 360ms ease, transform 360ms ease;
         }
 
         .mobile-banner .mobile-left { display:flex; align-items:center; gap:10px; }
@@ -764,7 +798,7 @@
         /* Floating dock that appears above the mobile banner */
         .mobile-dock-floating { display:none; }
         @media (max-width: 600px) {
-            .mobile-dock-floating { display:flex; position: fixed; left: 50%; transform: translateX(-50%); bottom: 126px; gap: 12px; z-index: 3600; padding: 8px 12px; background: rgba(0,0,0,0.06); border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
+            .mobile-dock-floating { display:flex; position: fixed; left: 50%; transform: translateX(-50%); bottom: 126px; gap: 16px; z-index: 3600; padding: 8px 12px; background: rgba(0,0,0,0.06); border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
             .mobile-dock-floating .block-cell { width: 44px; height:44px; border-radius:8px; }
         }
 
@@ -882,7 +916,7 @@
         transform: translateY(-50%);
         width: clamp(260px, 26vw, 360px);
         height: auto;
-        background: #ffffff;
+        background: rgb(255, 255, 255);
         border-radius: 16px;
         box-shadow: 0 14px 36px rgba(0,0,0,0.18);
         z-index: 3500;
@@ -1057,36 +1091,50 @@
 
         .reward-btn {
             position: relative;
-            /* Super bright gradient: Green -> Yellow-Green -> Green */
-            background: linear-gradient(90deg, #00e676, #ccff90, #00e676);
-            background-size: 200% auto;
-            color: #052e16; /* Darker text for contrast */
-            border: 4px solid #ffffff; /* White border to make it pop off the dark background */
-            padding: 18px 48px; /* Bigger padding */
-            border-radius: 999px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: clamp(18px, 5vmin, 24px); /* Bigger text */
+            background: transparent;
+            color: #0b2117;
+            border: none;
+            padding: 0;
             cursor: pointer;
-            margin-top: clamp(60px, 10vmin, 100px);
-            display: block;
+            margin-top: 24px;
+            display: inline-block;
             margin-left: auto;
             margin-right: auto;
-            
-            /* Intense shadow */
-            box-shadow: 
-                0 10px 40px rgba(0, 230, 118, 0.6), 
-                0 0 0 6px rgba(255, 255, 255, 0.2), /* Outer glow ring */
-                inset 0 2px 0 rgba(255,255,255,0.5);
-                
-            /* Continuous movement */
-            animation: 
-                gradient-move 3s linear infinite, 
-                heartbeat 1.5s ease-in-out infinite;
-                
+            line-height: 0; /* remove inline-img gap */
+            box-shadow: none;
+            animation: none;
             transform-origin: center;
+            width: clamp(220px, 56vw, 320px);
+            height: auto;
         }
+        .reward-btn .reward-img {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+            filter: drop-shadow(0 12px 28px rgba(0,0,0,0.35));
+            position: relative;
+            z-index: 1;
+        }
+        .reward-btn-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #171c15;
+            font-family: 'Mona Sans', 'Helvetica', sans-serif;
+            font-weight: 900;
+            font-size: clamp(22px, 4vw, 32px);
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            pointer-events: none;
+            width: 90%;
+            text-align: center;
+            z-index: 2;
+            white-space: nowrap;
+            text-shadow: 0 1px 8px #fffde644, 0 2px 12px #07892433;
+        }
+        
 
         /* Moving Gradient Background */
         @keyframes gradient-move {
@@ -1104,18 +1152,7 @@
         }
 
         /* Shine effect sweep */
-        .reward-btn::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
-            transform: skewX(-20deg);
-            animation: shine-sweep 3s infinite;
-            pointer-events: none;
-        }
+        .reward-btn::after { content: none; }
 
         @keyframes shine-sweep {
             0%, 60% { left: -100%; opacity: 0; }
@@ -1139,7 +1176,7 @@
         #game-container { width: 100%; max-width: 900px; margin-left: auto; margin-right: auto; }
         @media (min-width: 768px) {
             #game-container { --grid-size: clamp(420px, 52vmin, 560px); }
-            .dock { flex-direction: row; gap: clamp(0.8rem, 2vmin, 1.4rem); max-width: 700px; padding: 0 clamp(10px, 2vmin, 20px); }
+            .dock { flex-direction: row; gap: clamp(20px, 4vmin, 36px); max-width: var(--grid-size); width: var(--grid-size); padding: 0; justify-content: space-between; }
             .hud-row { gap: clamp(1rem, 3vmin, 2rem); }
         }
 
@@ -1162,9 +1199,10 @@
                 flex-direction: row !important;
                 flex-wrap: nowrap !important;
                 overflow-x: auto;
-                justify-content: center;
+                justify-content: space-between;
                 align-items: flex-start;
-                max-width: 820px;
+                max-width: var(--grid-size);
+                width: var(--grid-size);
             }
             .dock .block-shape {
                 display: inline-grid;
@@ -1186,9 +1224,7 @@
                 width: calc(var(--cell-size) * 0.68);
                 height: calc(var(--cell-size) * 0.68);
             }
-            .dock {
-                padding: 6px 0;
-            }
+            .dock { padding: 6px 0; gap: clamp(16px, 5vmin, 28px); justify-content: space-around; width: 100%; max-width: 100%; }
         }
 
         /* Floating desktop install button (for cases where bottom banner is hidden or covered) */
@@ -1449,11 +1485,13 @@
         /* NEW HUD DESIGN */
         .hud-row {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            gap: 24px !important;
-            width: 100%;
-            padding: 0 10px;
+            gap: clamp(12px, 3vmin, 24px) !important;
+            width: var(--grid-size);
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 4px;
             box-sizing: border-box;
         }
 
@@ -1563,6 +1601,174 @@
                 padding-top: 1vh !important;
             }
         }
+
+        /* Headline above grid */
+        .headline { text-align: center; margin: 4px 0 6px; line-height: 1.05; }
+        .headline .line1 { color: #ffffff; font-weight: 900; font-size: clamp(22px, 6.2vmin, 28px); text-shadow: 0 3px 8px rgba(0,0,0,0.45); }
+        .headline .line2 { color: #00e676; font-weight: 900; font-size: clamp(22px, 6.2vmin, 28px); text-shadow: 0 3px 8px rgba(0,0,0,0.45); }
+
+        /* Compact HUD (smaller, no icons) */
+        .hud-item.compact { flex: 0 0 auto; padding: 8px 14px; gap: 6px; min-width: clamp(150px, 26vmin, 200px); border-radius: 12px; min-height: 48px; }
+        .hud-item.compact .hud-label { font-size: 10px; margin-bottom: 0; opacity: 0.9; }
+        .hud-item.compact .hud-value { font-size: clamp(20px, 3.6vmin, 28px); }
+        /* Ensure both values use identical sizing and no extra animations */
+        .hud-item .hud-value#timer, .hud-item .hud-value#score { font-size: clamp(20px, 3.6vmin, 28px) !important; animation: none !important; }
+
+        /* Square HUD cards: equal width/height, stacked label/value */
+        .hud-item.square {
+            --hud-size: clamp(68px, 11vmin, 96px);
+            width: var(--hud-size);
+            height: var(--hud-size);
+            border-radius: 30px;
+            padding: 3px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            flex: 0 0 auto; /* prevent stretching */
+            min-width: 0; max-width: none;
+        }
+        .hud-item.square .hud-text { align-items: center; text-align: center; }
+        .hud-item.square .hud-label { font-size: 10px; letter-spacing: 0.6px; }
+        .hud-item.square .hud-value { font-size: clamp(16px, 3.2vmin, 22px); }
+
+        /* Tutorial micro-animations */
+        .tutorial-floats { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+        .tutorial-floats .float { position: absolute; top: 110%; opacity: 0.35; animation-name: floatY; animation-timing-function: linear; animation-iteration-count: infinite; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.35)); }
+        .tutorial-floats .coin { border-radius: 50%; }
+        .tutorial-floats .dollar { color: #c8ff7d; font-weight: 900; text-shadow: 0 4px 10px rgba(0,0,0,0.6); }
+        @keyframes floatY {
+            0%   { transform: translateY(0) translateX(0); opacity: 0; }
+            8%   { opacity: 0.35; }
+            92%  { opacity: 0.35; }
+            100% { transform: translateY(-140%) translateX(0); opacity: 0; }
+        }
+        .tutorial-banner {
+            left: 50%; top: 50%; transform: translate(-50%, -50%);
+            background: #3ccc65c3;
+            color: #0b2117;
+            font-weight: 900;
+            font-size: clamp(18px, 3.6vmin, 28px);
+            letter-spacing: .5px;
+            border-radius: 22px;
+            padding: 10px 22px;
+            box-sizing: border-box; /* ensure JS width includes padding */
+            box-shadow: 0 16px 46px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+            z-index: 3600;
+            text-align: center;
+            margin-bottom: 72px; /* lift above dock without overshooting */
+            pointer-events: none;
+            max-width: 92vw;
+            min-width: 220px;
+        }
+
+        /* tutorial banner entrance */
+        .tutorial-banner.animate {
+            animation: tut-banner-pop 760ms cubic-bezier(.2,.9,.25,1);
+        }
+        @keyframes tut-banner-pop {
+            0% { transform: translate(-50%, -40%) scale(0.96); opacity: 0; }
+            60% { transform: translate(-50%, -52%) scale(1.02); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* pointer idle bob while waiting (slower for clearer pacing) */
+        #tutorial-pointer.idle { animation: pointer-bob 2.4s ease-in-out infinite; }
+        @keyframes pointer-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .demo-cell {
+            width:38px;height:38px;border-radius:50%;
+            background:rgba(136,255,160,0.13);
+            box-shadow:0 0 0 1px #32ef73cc inset;
+        }
+        .demo-cell.filled {
+            background-image: url('images/imagSe.png');
+            background-size: cover;
+            background-color: transparent;
+            box-shadow: 0 6px 16px rgba(0,255,128,0.25), 0 0 8px rgba(0,0,0,0.2) inset;
+        }
+        .demo-cell.clearing { animation: tut-clear 320ms ease-out; }
+        @keyframes tut-clear {
+            0% { filter: brightness(2); transform: scale(1.08); }
+            100% { transform: scale(0.9); opacity: 0.3; }
+        }
+        #tutorial-pop-score.show { animation: tut-pop 1400ms ease-out forwards; }
+        #tutorial-pop-time.show { animation: tut-pop 1400ms ease-out 180ms forwards; }
+        @keyframes tut-pop {
+            0% { opacity: 0; transform: translate(-50%, -40%) scale(0.85); }
+            40% { opacity: 1; transform: translate(-50%, -80%) scale(1.08); }
+            100% { opacity: 0; transform: translate(-50%, -120%) scale(1); }
+        }
+
+        /* Ghost piece that animates over the REAL grid */
+        .tutorial-ghost {
+            position: fixed;
+            z-index: 4000; /* above overlay for visibility */
+            display: grid;
+            transition: left 1400ms cubic-bezier(.22,.9,.26,1), top 1400ms cubic-bezier(.22,.9,.26,1), transform 700ms ease, opacity 700ms ease;
+            filter: drop-shadow(0 12px 30px rgba(0,0,0,0.45));
+            will-change: left, top, transform, opacity;
+        }
+        .tutorial-ghost .ghost-cell {
+            border-radius: 50%;
+            background-image: url('images/imagSe.png');
+            background-size: cover;
+            background-color: transparent;
+            box-shadow: 0 8px 22px rgba(0,255,128,0.28), 0 0 10px rgba(0,0,0,0.22) inset;
+        }
+
+        /* Loading overlay */
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: rgba(6,18,12,0.32);
+            z-index: 5000;
+            backdrop-filter: blur(0px) saturate(1.02);
+            -webkit-backdrop-filter: blur(0px) saturate(1.02);
+            will-change: backdrop-filter, opacity;
+            animation: loading-enter 520ms cubic-bezier(.2,.9,.25,1) forwards;
+        }
+
+        @keyframes loading-enter {
+            0% { opacity: 0; backdrop-filter: blur(0px) saturate(1); background: rgba(6,18,12,0.0); }
+            100% { opacity: 1; backdrop-filter: blur(8px) saturate(1.04); background: rgba(6,18,12,0.54); }
+        }
+
+        .loading-logo { width: clamp(180px, 34vmin, 320px); height: auto; animation: load-pulse 1.6s ease-in-out infinite, load-glow 1.6s ease-in-out infinite; filter: drop-shadow(0 14px 36px rgba(0,0,0,0.38)); }
+        @keyframes load-pulse { 0%,100%{ transform: scale(1); opacity: 0.96 } 50% { transform: scale(1.12); opacity: 1 } }
+        @keyframes load-glow { 0% { filter: drop-shadow(0 12px 28px rgba(0,0,0,0.38)) drop-shadow(0 0 0 rgba(0,230,118,0)); } 50% { filter: drop-shadow(0 20px 46px rgba(0,230,118,0.22)) drop-shadow(0 0 18px rgba(72,255,59,0.18)); } 100% { filter: drop-shadow(0 12px 28px rgba(0,0,0,0.38)) drop-shadow(0 0 0 rgba(0,230,118,0)); } }
+
+        /* stronger, slower brand pulse while preparing tutorial */
+        #loading-overlay.prep .loading-logo { animation-duration: 1.8s; transform-origin: center; }
+
+        /* Loading message under the logo (two-line headline) */
+        .loading-message-wrapper { margin-top: 18px; text-align: center; pointer-events: none; }
+        .loading-line1, .loading-line2 {
+            font-family: 'Mona Sans', 'Helvetica', sans-serif;
+            font-weight: 900;
+            text-shadow: 0 6px 18px rgba(0,0,0,0.6);
+            letter-spacing: 0.4px;
+            opacity: 0;
+            transform: translateY(6px) scale(0.998);
+            animation: loading-msg-in 520ms cubic-bezier(.2,.9,.25,1) forwards 200ms;
+        }
+        .loading-line1 { color: #e9fff0; font-size: clamp(28px, 4.8vmin, 28px); }
+        .loading-line2 { font-size: clamp(28px, 8vmin, 48px); margin-top: 2px; color: #00e676; background: linear-gradient(90deg,#00e676,#00b85a); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        @keyframes loading-msg-in { 0% { opacity: 0; transform: translateY(10px) scale(0.996); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+
+        /* Global floating money background */
+        .bg-floats { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+        .bg-floats .float { position: absolute; top: 110%; opacity: 0.18; filter: drop-shadow(0 8px 18px rgba(0,0,0,0.35)); will-change: transform, opacity; }
+        .bg-floats .coin { width: 28px; height: 28px; border-radius: 50%; background: url('images/imagSe.png') center/cover no-repeat; }
+        .bg-floats .dollar { color: #c8ff7d; font-weight: 900; text-shadow: 0 4px 10px rgba(0,0,0,0.6); font-size: 24px; }
+
+        /* Add a gentle horizontal sway on top of vertical float */
+        .float.sway { animation-name: floatY, floatSway; animation-timing-function: linear, ease-in-out; animation-iteration-count: infinite, infinite; }
+        @keyframes floatSway { 0% { transform: translateX(0) rotate(0deg); } 50% { transform: translateX(6px) rotate(-3deg); } 100% { transform: translateX(0) rotate(0deg); } }
     </style>
 </head>
 <style>
@@ -1604,23 +1810,68 @@
 </style>
 <body>
 
-    <div id="game-container">
+        <!-- Loading overlay (shown until assets are preloaded) -->
+        <div id="loading-overlay">
+            <img src="images/Logo.png" alt="HeyCash" class="loading-logo">
+            <div class="loading-message-wrapper">
+                <div class="loading-line1">Earn Money By</div>
+                <div class="loading-line2">Playing  Games!</div>
+            </div>
+        </div>
+
+        <!-- Global floating money background -->
+        <div class="bg-floats" aria-hidden="true">
+            <div class="float coin" style="left:6%; animation-duration: 22s; animation-delay: -3s;"></div>
+            <div class="float dollar" style="left:14%; animation-duration: 26s; animation-delay: -9s; font-size:22px;">$</div>
+            <div class="float coin" style="left:26%; animation-duration: 18s; animation-delay: -6s; width:24px; height:24px;"></div>
+            <div class="float dollar" style="left:38%; animation-duration: 24s; animation-delay: -12s; font-size:26px;">$</div>
+            <div class="float coin" style="left:52%; animation-duration: 20s; animation-delay: -4s;"></div>
+            <div class="float dollar" style="left:64%; animation-duration: 28s; animation-delay: -14s; font-size:28px;">$</div>
+            <div class="float coin" style="left:78%; animation-duration: 23s; animation-delay: -7s; width:32px; height:32px;"></div>
+            <div class="float dollar" style="left:90%; animation-duration: 25s; animation-delay: -11s; font-size:24px;">$</div>
+        </div>
+
+        <!-- Tutorial overlay shown before game starts (auto-advances, first-load only) -->
+        <div id="tutorial-overlay" style="display: none; position: fixed; z-index: 3000; top:0; left:0; width:100vw; height:100vh; background:rgba(12, 52, 22, 0.325); align-items: center; justify-content:center; flex-direction:column;">
+            <!-- Floating background coins and $ -->
+            <div class="tutorial-floats" aria-hidden="true">
+                <img class="float coin" src="images/imagSe.png" style="left:8%; animation-duration: 16s; animation-delay: -3s; width:32px; height:32px;" alt="">
+                <div class="float dollar" style="left:22%; animation-duration: 18s; animation-delay: -6s; font-size:28px;">$</div>
+                <img class="float coin" src="images/imagSe.png" style="left:38%; animation-duration: 14s; animation-delay: -9s; width:28px; height:28px; opacity:.3;" alt="">
+                <div class="float dollar" style="left:56%; animation-duration: 20s; animation-delay: -2s; font-size:24px; opacity:.28;">$</div>
+                <img class="float coin" src="images/imagSe.png" style="left:72%; animation-duration: 17s; animation-delay: -11s; width:36px; height:36px;" alt="">
+                <div class="float dollar" style="left:86%; animation-duration: 15s; animation-delay: -5s; font-size:32px;">$</div>
+                <img class="float coin" src="images/imagSe.png" style="left:90%; animation-duration: 22s; animation-delay: -13s; width:26px; height:26px; opacity:.28;" alt="">
+            </div>
+            <!-- Banner over the real grid -->
+            <div id="tutorial-banner" class="tutorial-banner">Drag Blocks To Earn Your First Reward!</div>
+            <!-- Hand pointer that moves from dock to grid -->
+            <img id="tutorial-pointer" src="images/hand.png" style="width:44px;position:fixed;left:-100px;top:-100px;opacity:0.9;z-index:4000;transition:left 1.05s cubic-bezier(.25,.9,.26,1), top 1.05s cubic-bezier(.25,.9,.26,1);filter:drop-shadow(0 8px 24px rgba(0,0,0,0.5));" alt="pointer">
+            <!-- Reward pop texts centered on real grid -->
+            <div id="tutorial-pop-score" style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);color:#ffeb3b;font-weight:900;font-size:32px;opacity:0;text-shadow:0 4px 8px rgba(0,0,0,.5);pointer-events:none;z-index:4000;">+100</div>
+            <div id="tutorial-pop-time" style="position:fixed;left:52%;top:56%;transform:translate(-50%,-50%);color:#71f588;font-weight:900;font-size:24px;opacity:0;text-shadow:0 4px 8px rgba(0,0,0,.5);pointer-events:none;z-index:4000;">+2s</div>
+            <button id="tutorial-cta" onclick="tutorialNextStep()" style="margin-top:44px;font-size:clamp(22px,5vw,26px);background:linear-gradient(90deg,#01e991 80%,#38ff4f 110%);border:none;border-radius:2em;letter-spacing:1.2px;font-weight:900;color:#175e35;box-shadow:0 10px 40px #14e35b32;padding:20px 54px;cursor:pointer;display:none;">Start Playing</button>
+        </div>
+        <div id="game-container">
         <img src="images/Logo.png" alt="HeyCash Logo" class="logo" style="width: clamp(420px, 40vmin, 700px); max-width: 70%; height: auto;">
         
         <div class="play-area">
+            <div class="headline">
+                <div class="line1">Earn Money By</div>
+                <div class="line2">Playing Games!</div>
+            </div>
+
             <div class="hud-row">
-                <div class="hud-item">
-                    <div class="hud-icon">⏱️</div>
+                <div class="hud-item compact square">
                     <div class="hud-text">
-                        <span class="hud-label">Time Left</span>
+                        <span class="hud-label">Time</span>
                         <span class="hud-value" id="timer">60</span>
                     </div>
                 </div>
                 
-                <div class="hud-item">
-                    <div class="hud-icon">🏆</div>
+                <div class="hud-item compact square">
                     <div class="hud-text">
-                        <span class="hud-label">Your Score</span>
+                        <span class="hud-label">Score</span>
                         <span class="hud-value" id="score">0</span>
                     </div>
                 </div>
@@ -1654,57 +1905,7 @@
         <img src="images/install-cta.png" class="mobile-install-img" id="mobile-install" alt="Install HeyCash" aria-label="Install HeyCash">
     </div>
 
-    <div id="start-screen" class="overlay redesign-start">
-        <div class="decor-block decor-1" style="grid-template-columns: repeat(3, 1fr);">
-            <div class="cell" style="background:#ef5350"></div>
-            <div class="cell" style="background:#ef5350"></div>
-            <div class="cell" style="background:#ef5350"></div>
-            <div style=""></div>
-            <div class="cell" style="background:#ef5350"></div>
-        </div>
-        <div class="decor-block decor-2" style="grid-template-columns: repeat(2, 1fr);">
-            <div class="cell" style="background:#42a5f5"></div>
-            <div style=""></div>
-            <div class="cell" style="background:#42a5f5"></div>
-            <div class="cell" style="background:#42a5f5"></div>
-            <div class="cell" style="background:#42a5f5"></div>
-        </div>
-        <div class="decor-block decor-3" style="grid-template-columns: repeat(2, 1fr);">
-            <div class="cell" style="background:#ffca28"></div>
-            <div class="cell" style="background:#ffca28"></div>
-            <div class="cell" style="background:#ffca28"></div>
-            <div class="cell" style="background:#ffca28"></div>
-        </div>
-        <div class="decor-block decor-4" style="grid-template-rows: repeat(4, 1fr);">
-            <div class="cell" style="background:#26c6da"></div>
-            <div class="cell" style="background:#26c6da"></div>
-            <div class="cell" style="background:#26c6da"></div>
-            <div class="cell" style="background:#26c6da"></div>
-        </div>
-        <div class="decor-block decor-5" style="grid-template-columns: repeat(2, 1fr);">
-            <div class="cell" style="background:#ab47bc"></div>
-            <div class="cell" style="background:#ab47bc"></div>
-            <div class="cell" style="background:#ab47bc"></div>
-            <div class="cell" style="background:#ab47bc"></div>
-        </div>
-        <div class="decor-block decor-6" style="grid-template-columns: repeat(3, 1fr);">
-            <div class="cell" style="background:#66bb6a"></div>
-            <div class="cell" style="background:#66bb6a"></div>
-            <div style=""></div>
-            <div style=""></div>
-            <div class="cell" style="background:#66bb6a"></div>
-            <div class="cell" style="background:#66bb6a"></div>
-        </div>
-
-        <img src="images/Logo.png" alt="HeyCash Logo" class="logo">
-        <h1 class="game-title">BLOCK BLAST</h1>
-        <ul class="features-list">
-            <li><span class="dot"></span>Drag blocks</li>
-            <li><span class="dot"></span>Clear lines</li>
-        </ul>
-        <h2 class="earn-title">Earn REWARDS</h2>
-        <button class="tap-play-btn" onclick="userInteractStart()">TAP TO PLAY</button>
-    </div>
+    <!-- Start screen removed: game starts immediately -->
 
 <div id="game-over" class="overlay">
     <div class="sun-rot" aria-hidden="true"></div>
@@ -1731,7 +1932,10 @@
         </div>
     </div>
     
-    <button class="reward-btn" onclick="installApp()">CLAIM REWARD</button>
+        <button class="reward-btn" onclick="installApp()">
+            <span class="reward-btn-text">CLAIM REWARD</span>
+            <img class="reward-img" src="images/Group 9.png" alt="Claim Reward">
+        </button>
 </div>
 
 
@@ -1750,11 +1954,11 @@
             // Block Textures (Mapped to the 5 colors)
             // Example: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
             textures: [
-                'images/Logo2 - Small.png',
-                'images/Logo2 - Small.png',
-                'images/Logo2 - Small.png',
-                'images/Logo2 - Small.png',
-                'images/Logo2 - Small.png'
+                'images/imagSe.png',
+                'images/imagSe.png',
+                'images/imagSe.png',
+                'images/imagSe.png',
+                'images/imagSe.png'
             ]
         };
 
@@ -1830,6 +2034,7 @@
 
         const GRID_SIZE = 8;
         const INITIAL_TIME = 25;
+        let isTutorialActive = false; // gate interactions and scoring during tutorial
         
         // Colors (Fallback if no Base64 texture provided)
         const COLORS = [
@@ -1887,8 +2092,8 @@
 
         const gridEl = document.getElementById('grid');
         const dockEl = document.getElementById('dock');
-        const scoreEl = document.getElementById('score');
-        const timerEl = document.getElementById('timer');
+        let scoreEl = document.getElementById('score');
+        let timerEl = document.getElementById('timer');
         const mainHeaderLogo = document.querySelector('#game-container > .logo');
 
         // Apply Background Asset if present
@@ -1899,13 +2104,17 @@
 
         function initGame() {
             createGrid();
+            // bind HUD elements above the grid
+            scoreEl = document.getElementById('score');
+            timerEl = document.getElementById('timer');
             updateGridVisuals(); // reflect pre-filled cells immediately
         }
 
         // Called only after user clicks "Tap to Play"
         function userInteractStart() {
-            document.getElementById('start-screen').style.display = 'none';
-            // restore the main in-layout logo when the start overlay is dismissed
+            const startEl = document.getElementById('start-screen');
+            if (startEl) startEl.style.display = 'none';
+            // ensure the main in-layout logo is visible
             if (mainHeaderLogo) mainHeaderLogo.style.display = '';
             isGameActive = true;
             // Show bottom banner on all screens (desktop included)
@@ -1978,7 +2187,8 @@
                 
                 // 1. Calculate all geometry while element is still in its original context
                 const rect = el.getBoundingClientRect();
-                const gridCellSize = gridEl.firstElementChild.getBoundingClientRect().width;
+                const firstCell = gridEl.querySelector('.cell');
+                const gridCellSize = firstCell ? firstCell.getBoundingClientRect().width : 0;
                 const blockCell = el.querySelector('.block-cell');
                 const blockCellSize = blockCell ? blockCell.getBoundingClientRect().width : rect.width;
                 const scale = gridCellSize / blockCellSize;
@@ -2032,7 +2242,7 @@
                 // show potential placement while dragging
                 try {
                     const gridRect = gridEl.getBoundingClientRect();
-                    const cellRect = gridEl.firstElementChild.getBoundingClientRect();
+                    const cellRect = gridEl.querySelector('.cell').getBoundingClientRect();
                     const cellSize = cellRect.width;
                     const gap = parseFloat(getComputedStyle(gridEl).gap);
                     const padding = parseFloat(getComputedStyle(gridEl).padding);
@@ -2061,8 +2271,9 @@
             // Track and show possible placement highlight while moving
             let lastHighlight = [];
             const clearHighlights = () => {
+                const cells = gridEl.querySelectorAll('.cell');
                 lastHighlight.forEach(idx => {
-                    if (gridEl.children[idx]) gridEl.children[idx].classList.remove('highlight');
+                    if (cells[idx]) cells[idx].classList.remove('highlight');
                 });
                 lastHighlight = [];
             };
@@ -2070,6 +2281,7 @@
             const showHighlight = (matrix, startRow, startCol) => {
                 clearHighlights();
                 if (!matrix) return;
+                const cells = gridEl.querySelectorAll('.cell');
                 for (let r=0;r<matrix.length;r++){
                     for (let c=0;c<matrix[0].length;c++){
                         if (matrix[r][c]===1){
@@ -2077,7 +2289,7 @@
                             const gc = startCol + c;
                             if (gr>=0 && gr<GRID_SIZE && gc>=0 && gc<GRID_SIZE){
                                 const idx = gr*GRID_SIZE + gc;
-                                gridEl.children[idx].classList.add('highlight');
+                                if (cells[idx]) cells[idx].classList.add('highlight');
                                 lastHighlight.push(idx);
                             }
                         }
@@ -2095,7 +2307,7 @@
 
                 // Hit Test with tolerance & neighborhood search
                 const gridRect = gridEl.getBoundingClientRect();
-                const cellRect = gridEl.firstElementChild.getBoundingClientRect();
+                const cellRect = gridEl.querySelector('.cell').getBoundingClientRect();
                 const cellSize = cellRect.width;
                 const gap = parseFloat(getComputedStyle(gridEl).gap);
                 const padding = parseFloat(getComputedStyle(gridEl).padding);
@@ -2186,14 +2398,18 @@
                     }
                 }
             }
-            score += 25;
+            if (!isTutorialActive) {
+                score += 25;
+            }
             updateGridVisuals();
             checkLines();
-            scoreEl.innerText = score;
+            if (!isTutorialActive) {
+                scoreEl.innerText = score;
+            }
         }
 
         function updateGridVisuals() {
-            const cells = gridEl.children;
+            const cells = gridEl.querySelectorAll('.cell');
             for (let r = 0; r < GRID_SIZE; r++) {
                 for (let c = 0; c < GRID_SIZE; c++) {
                     const idx = r * GRID_SIZE + c;
@@ -2210,11 +2426,11 @@
                             cell.style.backgroundColor = color;
                             cell.style.backgroundImage = '';
                         }
-                        cell.style.boxShadow = 'inset 0 0 5px rgba(0,0,0,0.3)';
+                        cell.classList.add('has-coin');
                     } else {
-                        cell.style.backgroundColor = ''; // Reset
+                        cell.style.backgroundColor = '';
                         cell.style.backgroundImage = '';
-                        cell.style.boxShadow = '';
+                        cell.classList.remove('has-coin');
                     }
                 }
             }
@@ -2235,7 +2451,7 @@
             }
 
             if (rowsToClear.length > 0 || colsToClear.length > 0) {
-                const cells = gridEl.children;
+                const cells = gridEl.querySelectorAll('.cell');
                 // Animate
                 rowsToClear.forEach(r => {
                     for(let c=0; c<GRID_SIZE; c++) cells[r*GRID_SIZE + c].classList.add('clearing');
@@ -2261,19 +2477,23 @@
                     updateGridVisuals();
                 }, 300);
 
-                score += points;
-                timeLeft += lines * 2;
-                scoreEl.innerText = score;
-                timerEl.innerText = timeLeft;
+                if (!isTutorialActive) {
+                    score += points;
+                    timeLeft += lines * 2;
+                    scoreEl.innerText = score;
+                    timerEl.innerText = timeLeft;
+                }
                 // animate value pop when points/time change
-                try {
-                    scoreEl.classList.remove('pop');
-                    void scoreEl.offsetWidth;
-                    scoreEl.classList.add('pop');
-                    timerEl.classList.remove('pop');
-                    void timerEl.offsetWidth;
-                    timerEl.classList.add('pop');
-                } catch (e) {}
+                if (!isTutorialActive) {
+                    try {
+                        scoreEl.classList.remove('pop');
+                        void scoreEl.offsetWidth;
+                        scoreEl.classList.add('pop');
+                        timerEl.classList.remove('pop');
+                        void timerEl.offsetWidth;
+                        timerEl.classList.add('pop');
+                    } catch (e) {}
+                }
             }
         }
 
@@ -2345,15 +2565,421 @@
 
         initGame();
 
-        // If the start-screen overlay is visible on load, hide the main header logo
-        // so it doesn't show through the translucent overlay.
-        (function(){
-            const start = document.getElementById('start-screen');
-            if (start && start.style.display !== 'none') {
-                if (mainHeaderLogo) mainHeaderLogo.style.display = 'none';
+        // --- Tutorial logic (auto-advance + first-load only) ---
+        const TUTORIAL_KEY = 'hc_tutorial_seen_v2';
+        let tutorialStage = 0;
+        const tutorialOverlay = document.getElementById('tutorial-overlay');
+        const tutorialPointer = document.getElementById('tutorial-pointer');
+        const tutorialCta = document.getElementById('tutorial-cta');
+        const tutorialAnimWrap = document.getElementById('tutorial-anim-wrap');
+        const tutorialBanner = document.getElementById('tutorial-banner');
+        const tPopScore = document.getElementById('tutorial-pop-score');
+        const tPopTime = document.getElementById('tutorial-pop-time');
+        let __tutorialBackup = null;
+
+        // Utilities for real-grid demo
+        function getGridMetrics(){
+            const gridRect = gridEl.getBoundingClientRect();
+            const cellRect = gridEl.querySelector('.cell').getBoundingClientRect();
+            const styles = getComputedStyle(gridEl);
+            const gap = parseFloat(styles.gap) || 0;
+            const padding = parseFloat(styles.padding) || 0;
+            return { gridRect, cellSize: cellRect.width, gap, padding, total: cellRect.width + gap };
+        }
+        function indexToCell(r,c){ return gridEl.querySelectorAll('.cell')[r*GRID_SIZE + c]; }
+        function highlightCells(r, startC, len){
+            const cells = gridEl.querySelectorAll('.cell');
+            for (let i=0;i<len;i++) cells[r*GRID_SIZE + (startC+i)].classList.add('highlight');
+        }
+        function highlightArea(r, c, h, w){
+            const cells = gridEl.querySelectorAll('.cell');
+            for (let i=0;i<h;i++){
+                for (let j=0;j<w;j++){
+                    cells[(r+i)*GRID_SIZE + (c+j)].classList.add('highlight');
+                }
             }
+        }
+        function clearHighlightsReal(){ gridEl.querySelectorAll('.cell.highlight').forEach(el=>el.classList.remove('highlight')); }
+        function backupState(){
+            __tutorialBackup = {
+                grid: gridState.map(row=>row.slice()),
+                score,
+                timeLeft
+            };
+        }
+        function restoreState(){
+            if (!__tutorialBackup) return;
+            gridState = __tutorialBackup.grid.map(row=>row.slice());
+            score = __tutorialBackup.score;
+            timeLeft = __tutorialBackup.timeLeft;
+            updateGridVisuals();
+        }
+        async function animateGhostPlacement(matrix, targetRow, targetCol, colorIdx){
+            const rows = matrix.length; const cols = matrix[0].length;
+            const { gridRect, cellSize, gap, padding, total } = getGridMetrics();
+            const ghost = document.createElement('div');
+            ghost.className = 'tutorial-ghost';
+            ghost.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
+            ghost.style.gridTemplateRows = `repeat(${rows}, ${cellSize}px)`;
+            ghost.style.gap = `${gap}px`;
+            ghost.style.width = `${cols*cellSize + (cols-1)*gap}px`;
+            ghost.style.height = `${rows*cellSize + (rows-1)*gap}px`;
+            for (let r=0;r<rows;r++){
+                for (let c=0;c<cols;c++){
+                    const d = document.createElement('div');
+                    if (matrix[r][c]===1){
+                        d.className = 'ghost-cell';
+                        d.style.width = `${cellSize}px`;
+                        d.style.height = `${cellSize}px`;
+                    } else {
+                        d.style.width = `${cellSize}px`;
+                        d.style.height = `${cellSize}px`;
+                        d.style.opacity = '0';
+                    }
+                    ghost.appendChild(d);
+                }
+            }
+            const dockRect = dockEl.getBoundingClientRect();
+            const startLeft = dockRect.left + (dockRect.width - (cols*cellSize + (cols-1)*gap)) / 2;
+            const startTop  = dockRect.top + 6;
+            ghost.style.left = `${startLeft}px`;
+            ghost.style.top  = `${startTop}px`;
+            ghost.style.opacity = '0.98';
+            ghost.style.transform = 'scale(0.96)';
+            document.body.appendChild(ghost);
+
+            // pointer from dock to target
+            tutorialPointer.style.left = (dockRect.left + dockRect.width*0.65) + 'px';
+            tutorialPointer.style.top  = (dockRect.top + 22) + 'px';
+
+            await delay(600);
+            const targetLeft = gridRect.left + padding + targetCol*total;
+            const targetTop  = gridRect.top  + padding + targetRow*total;
+            // add a little pop as it moves into position
+            ghost.style.transform = 'scale(1.02)';
+            ghost.style.left = `${targetLeft}px`;
+            ghost.style.top  = `${targetTop}px`;
+            tutorialPointer.style.left = (targetLeft + cols*cellSize - 8) + 'px';
+            tutorialPointer.style.top  = (targetTop + rows*cellSize + 12) + 'px';
+            await delay(1600);
+            // settle
+            ghost.style.transform = 'scale(1)';
+            clearHighlightsReal();
+            placeBlock(matrix, targetRow, targetCol, colorIdx);
+            await delay(540);
+            ghost.style.opacity = '0';
+            await delay(360);
+            ghost.remove();
+        }
+
+        function startTutorial() {
+            // Ensure gameplay is disabled during tutorial
+            isGameActive = false; isTutorialActive = true;
+            const mobileBanner = document.getElementById('mobile-banner');
+            if (mobileBanner) mobileBanner.style.display = 'none';
+
+            tutorialOverlay.style.display = 'flex';
+            // start light tutorial floats
+            try { startTutorialFloats(); } catch(e){}
+            tutorialStage = 0;
+            tutorialCta.style.display = 'none';
+            runTutorialSequence();
+        }
+
+
+        // No skip tutorial option per request
+
+        function endTutorialAndStart(){
+            tutorialOverlay.style.display = 'none';
+            clearHighlightsReal();
+            restoreState();
+            isTutorialActive = false;
+            // cleanup tutorial floats
+            try {
+                clearInterval(window.__tutFloatTimer);
+                window.__tutActivePositions = [];
+                const host = document.querySelector('.tutorial-floats');
+                if (host) host.querySelectorAll('.float').forEach(el => el.remove());
+            } catch(e) {}
+            userInteractStart();
+        }
+
+        function tutorialNextStep(){
+            // Final CTA pressed
+            endTutorialAndStart();
+        }
+
+        function delay(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+        function rectRel(child, relativeTo){
+            const cr = child.getBoundingClientRect();
+            const rr = relativeTo.getBoundingClientRect();
+            return { left: cr.left - rr.left, top: cr.top - rr.top, width: cr.width, height: cr.height };
+        }
+
+        async function runTutorialSequence(){
+            backupState();
+            // Position banner relative to grid; will tweak per step
+            const { gridRect } = getGridMetrics();
+            const bannerWidth = Math.min(gridRect.width * 0.86, gridRect.width);
+            tutorialBanner.style.width = bannerWidth + 'px';
+            tutorialBanner.style.left = (gridRect.left + (gridRect.width - bannerWidth)/2) + 'px';
+            tutorialBanner.style.transform = 'translate(0, -50%)';
+            // add entrance animation class
+            tutorialBanner.classList.add('animate');
+
+            // STEP 1: Place a block (no clear)
+            // Banner slightly above center for placement clarity
+            tutorialBanner.style.top = (gridRect.top + gridRect.height * 0.28) + 'px';
+            tutorialPointer.classList.add('idle');
+            for (let r=0;r<GRID_SIZE;r++) for (let c=0;c<GRID_SIZE;c++) gridState[r][c] = null;
+            updateGridVisuals();
+            tutorialBanner.textContent = 'Step 1 of 3 · Drag a block to place it';
+            const m1 = [[1,1],[1,1]]; // 2x2 square
+            highlightArea(2,2,2,2);
+            await animateGhostPlacement(m1, 2, 2, 2);
+            await delay(1400);
+
+            // STEP 2: Complete a row
+            // Lower banner a bit to make room for the pointer and row action
+            tutorialBanner.style.top = (gridRect.top + gridRect.height * 0.36) + 'px';
+            tutorialBanner.textContent = 'Step 2 of 3 · Complete a row to clear it';
+            for (let r=0;r<GRID_SIZE;r++) for (let c=0;c<GRID_SIZE;c++) gridState[r][c] = null;
+            const demoRow = 3; const startCol = 2; const pieceLen = 3; const colorIdx = 2;
+            for (let c=0;c<GRID_SIZE;c++) if (c<startCol || c>startCol+pieceLen-1) gridState[demoRow][c] = colorIdx;
+            updateGridVisuals();
+            highlightCells(demoRow, startCol, pieceLen);
+            await animateGhostPlacement([[1,1,1]], demoRow, startCol, colorIdx);
+            // Reward popups
+            const { gridRect: gr2 } = getGridMetrics();
+            tPopScore.classList.remove('show'); tPopTime.classList.remove('show');
+            tPopScore.style.left = (gr2.left + gr2.width/2) + 'px';
+            tPopScore.style.top  = (gr2.top + gr2.height/2) + 'px';
+            tPopTime.style.left  = (gr2.left + gr2.width/2 + 24) + 'px';
+            tPopTime.style.top   = (gr2.top + gr2.height/2 + 28) + 'px';
+            tPopScore.classList.add('show');
+            await delay(260);
+            tPopTime.classList.add('show');
+            await delay(1500);
+
+            // STEP 3: Complete a column
+            // Raise banner higher for column action so it doesn't overlap the column
+            tutorialBanner.style.top = (gridRect.top + gridRect.height * 0.22) + 'px';
+            tutorialBanner.textContent = 'Step 3 of 3 · Complete a column to clear it';
+            for (let r=0;r<GRID_SIZE;r++) for (let c=0;c<GRID_SIZE;c++) gridState[r][c] = null;
+            const demoCol = 4; const startRow = 2; const vLen = 3;
+            for (let r=0;r<GRID_SIZE;r++) if (r<startRow || r>startRow+vLen-1) gridState[r][demoCol] = colorIdx;
+            updateGridVisuals();
+            highlightArea(startRow, demoCol, vLen, 1);
+            await animateGhostPlacement([[1],[1],[1]], startRow, demoCol, colorIdx);
+            // Reward popups again
+            const { gridRect: gr3 } = getGridMetrics();
+            tPopScore.classList.remove('show'); tPopTime.classList.remove('show');
+            tPopScore.style.left = (gr3.left + gr3.width/2) + 'px';
+            tPopScore.style.top  = (gr3.top + gr3.height/2) + 'px';
+            tPopTime.style.left  = (gr3.left + gr3.width/2 + 24) + 'px';
+            tPopTime.style.top   = (gr3.top + gr3.height/2 + 28) + 'px';
+            tPopScore.classList.add('show');
+            await delay(260);
+            tPopTime.classList.add('show');
+
+            await delay(2400);
+            endTutorialAndStart();
+        }
+
+        // Preload assets, then start tutorial (logo pulses during wait)
+        async function preloadSimple(paths, timeoutMs = 2800){
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const jobs = paths.map(p => new Promise(res => { const img = new Image(); img.onload = img.onerror = () => res(); img.src = p; }));
+            await Promise.race([Promise.all(jobs), new Promise(r => setTimeout(r, timeoutMs))]);
+            await delay(150);
+            if (loadingOverlay) loadingOverlay.style.display = 'none';
+        }
+
+        (async function startAfterPreload(){
+            const assetsToPreload = [
+                'images/imagSe.png','images/hand.png','images/Logo.png','images/HC-bg.png','images/Group 9.png','images/paypal.png','images/Logo2 - Small.png','images/Logo2.png','images/install-cta.png','images/bar.png','images/sun.png'
+            ];
+            try { await preloadSimple(assetsToPreload, 3200); } catch(e){}
+            // ensure loading overlay remains visible for the remaining branding pause
+            const loadingOverlay = document.getElementById('loading-overlay');
+            try { if (loadingOverlay) { loadingOverlay.style.display = 'flex'; loadingOverlay.classList.add('prep'); } } catch(e){}
+            // prepare tutorial assets (images/templates) while the logo pulses
+            try { prepareTutorialAssets(assetsToPreload); } catch(e){}
+            // brief extra pause to ensure layout paints
+            await delay(200);
+            // Start background floating money once the page is ready
+            try { startBackgroundFloats(); } catch(e){}
+            // Hold on the loading/logo pulse for 4 seconds so players perceive the brand
+            await delay(4000);
+            // remove the prep class so pulse returns to normal and hide overlay
+            try { if (loadingOverlay) { loadingOverlay.classList.remove('prep'); loadingOverlay.style.display = 'none'; } } catch(e){}
+            // Always show the tutorial on load per request
+            startTutorial();
         })();
 
+        // --- Background floating money spawner ---
+        function startBackgroundFloats(){
+            const host = document.querySelector('.bg-floats');
+            if (!host) return;
+            // Responsive density: adjust for mobile vs desktop
+            const isMobile = window.matchMedia('(max-width:600px)').matches;
+            if (!window.__bgActivePositions) {
+                window.__bgActivePositions = [];
+                const existing = host.querySelectorAll('.float');
+                existing.forEach(el => {
+                    const leftStr = (el.style.left || '').trim();
+                    if (leftStr.endsWith('%')) {
+                        const n = parseFloat(leftStr);
+                        if (!Number.isNaN(n)) window.__bgActivePositions.push(n);
+                    }
+                });
+            }
+
+            const MIN_DIST = isMobile ? 10 : 8; // wider spacing on small screens
+            const MAX_TRIES = 14;
+            const pickLeft = () => {
+                let best = null, bestGap = -1;
+                for (let i = 0; i < MAX_TRIES; i++) {
+                    const cand = 5 + Math.random() * 90;
+                    let gap = Infinity;
+                    for (const p of window.__bgActivePositions) gap = Math.min(gap, Math.abs(cand - p));
+                    if (gap >= MIN_DIST) return cand;
+                    if (gap > bestGap) { bestGap = gap; best = cand; }
+                }
+                return best ?? (5 + Math.random() * 90);
+            };
+
+            const spawnFloat = () => {
+                const isCoin = Math.random() < 0.65;
+                const el = document.createElement('div');
+                el.className = 'float ' + (isCoin ? 'coin' : 'dollar');
+                if (!isCoin) el.textContent = '$';
+                const left = pickLeft();
+                el.style.left = left + '%';
+                el.dataset.left = String(left);
+                window.__bgActivePositions.push(left);
+
+                if (isCoin) {
+                    const size = (isMobile ? 16 : 20) + Math.random() * (isMobile ? 18 : 28);
+                    el.style.width = size + 'px';
+                    el.style.height = size + 'px';
+                } else {
+                    el.style.fontSize = (16 + Math.random() * 18) + 'px';
+                    el.style.opacity = isMobile ? 0.18 : 0.22;
+                }
+
+                const dur = (isMobile ? 16 : 22) + Math.random() * (isMobile ? 10 : 16);
+                el.style.animationDuration = dur + 's';
+                el.style.animationDelay = (-Math.random() * dur) + 's';
+                host.appendChild(el);
+
+                // add occasional gentle sway to make motion feel organic
+                if (Math.random() < 0.7) el.classList.add('sway');
+
+                setTimeout(() => {
+                    const val = parseFloat(el.dataset.left || 'NaN');
+                    if (!Number.isNaN(val)) {
+                        const idx = window.__bgActivePositions.indexOf(val);
+                        if (idx >= 0) window.__bgActivePositions.splice(idx, 1);
+                    }
+                    try{ el.remove(); }catch(e){}
+                }, (dur + 2) * 1000);
+            };
+
+            const seedCount = isMobile ? 8 : 14;
+            for (let i = 0; i < seedCount; i++) spawnFloat();
+
+            clearInterval(window.__bgFloatTimer);
+            window.__bgFloatTimer = setInterval(() => {
+                if (document.hidden) return;
+                spawnFloat();
+            }, isMobile ? 1600 : 1100);
+        }
+
+        // Prepare tutorial assets while loading so the demo runs without hiccups
+        function prepareTutorialAssets(paths){
+            try {
+                // ensure common images are cached in memory
+                window.__tutImages = window.__tutImages || {};
+                const toLoad = ['images/imagSe.png','images/hand.png','images/Logo.png','images/Logo2 - Small.png'];
+                toLoad.forEach(p => {
+                    if (window.__tutImages[p]) return;
+                    const img = new Image();
+                    img.src = p;
+                    window.__tutImages[p] = img;
+                });
+
+                // create an offscreen container with a hidden ghost template so layout is prepared
+                if (!document.getElementById('__tut_offscreen')){
+                    const off = document.createElement('div');
+                    off.id = '__tut_offscreen';
+                    off.style.position = 'absolute';
+                    off.style.left = '-9999px';
+                    off.style.top = '-9999px';
+                    off.style.width = '1px';
+                    off.style.height = '1px';
+                    off.style.overflow = 'hidden';
+                    // small ghost template (1x1) to warm CSS rules
+                    const tghost = document.createElement('div');
+                    tghost.className = 'tutorial-ghost';
+                    tghost.style.opacity = '0';
+                    tghost.setAttribute('aria-hidden','true');
+                    off.appendChild(tghost);
+                    document.body.appendChild(off);
+                }
+            } catch(e) { /* non-fatal */ }
+        }
+
+        // --- Tutorial overlay floating money spawner (more spaced, lighter) ---
+        function startTutorialFloats(){
+            const host = document.querySelector('.tutorial-floats');
+            if (!host) return;
+            const isMobile = window.matchMedia('(max-width:600px)').matches;
+            if (!window.__tutActivePositions) window.__tutActivePositions = [];
+            const MIN_DIST = isMobile ? 12 : 10; // percent
+            const MAX_TRIES = 12;
+            const pickLeft = () => {
+                let best = null, bestGap = -1;
+                for (let i=0;i<MAX_TRIES;i++){
+                    const cand = 6 + Math.random()*88;
+                    let gap = Infinity;
+                    for (const p of window.__tutActivePositions) gap = Math.min(gap, Math.abs(cand - p));
+                    if (gap >= MIN_DIST) return cand;
+                    if (gap > bestGap) { bestGap = gap; best = cand; }
+                }
+                return best ?? (6 + Math.random()*88);
+            };
+            const spawn = () => {
+                const isCoin = Math.random() < 0.72;
+                const el = document.createElement(isCoin ? 'img' : 'div');
+                el.className = 'float ' + (isCoin ? 'coin' : 'dollar');
+                if (isCoin) { el.src = 'images/imagSe.png'; el.alt = ''; }
+                else { el.textContent = '$'; }
+                const left = pickLeft();
+                el.style.left = left + '%';
+                el.dataset.left = String(left);
+                window.__tutActivePositions.push(left);
+                if (isCoin){ const size = (isMobile?18:22) + Math.random()*(isMobile?14:22); el.style.width = size+'px'; el.style.height = size+'px'; }
+                else { el.style.fontSize = (isMobile?18:20) + Math.random()*(isMobile?12:18) + 'px'; el.style.opacity = isMobile?0.22:0.28; }
+                const dur = (isMobile?12:16) + Math.random()*(isMobile?8:12);
+                el.style.animationDuration = dur + 's'; el.style.animationDelay = (-Math.random()*dur)+'s';
+                host.appendChild(el);
+                if (Math.random() < 0.75) el.classList.add('sway');
+                setTimeout(()=>{
+                    const val = parseFloat(el.dataset.left || 'NaN');
+                    if (!Number.isNaN(val)) {
+                        const idx = window.__tutActivePositions.indexOf(val);
+                        if (idx>=0) window.__tutActivePositions.splice(idx, 1);
+                    }
+                    try{ el.remove(); }catch(e){}
+                }, (dur+1.5)*1000);
+            };
+            const seed = isMobile?6:8;
+            for (let i=0;i<seed;i++) spawn();
+            clearInterval(window.__tutFloatTimer);
+            window.__tutFloatTimer = setInterval(()=>{ if (document.hidden) return; spawn(); }, isMobile?1400:1200);
+        }
     </script>
 
     <div class="hey-banner" onclick="installApp()">
