@@ -7,7 +7,8 @@
         html, body {
             zoom: 1 !important;
             height: 100%;
-            overflow: hidden; /* disable page scrolling */
+            /* allow scrolling on small devices to prevent top cropping by browser UI */
+            overflow: auto;
         }
     </style>
     <title>HeyCash!</title>
@@ -31,7 +32,8 @@
             padding: 0;
             overflow: hidden;
             width: 100vw;
-            height: 100vh;
+            /* prefer flexible height to avoid mobile browser chrome cropping */
+            min-height: calc(100vh - env(safe-area-inset-top, 0px));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -63,10 +65,11 @@
         /* FIX: Center vertically to remove the big gap at the bottom */
         justify-content: center; 
         width: 80%;
-        height: 100vh;
+        /* Avoid using strict 100vh which can be cropped on mobile; respect safe-area */
+        min-height: calc(100vh - env(safe-area-inset-top, 0px));
         margin: 0 auto;
-        /* FIX: Use flexible vertical padding (vh) so it doesn't get stuck */
-        padding: 2vh 10px; 
+        /* Use flexible vertical padding; safe-area top inset applied only on small screens below */
+        padding: 2vh 10px 2vh 10px;
         
         /* expose grid sizing variables so dock items can match grid cell size */
         --grid-size: clamp(300px, 45vmin, 380px);
@@ -77,6 +80,16 @@
         position: relative;
         z-index: 1;
         overflow: hidden; /* disable container scrolling */
+    }
+
+    /* Prefer dynamic viewport units on supporting browsers to avoid mobile chrome cropping */
+    @supports (height: 100svh) or (height: 100dvh) {
+        @supports (height: 100svh) {
+            #game-container { height: 100svh; min-height: calc(100svh - env(safe-area-inset-top, 0px)); }
+        }
+        @supports (height: 100dvh) and not (height: 100svh) {
+            #game-container { height: 100dvh; min-height: calc(100dvh - env(safe-area-inset-top, 0px)); }
+        }
     }
 
         @media (orientation: landscape) {
@@ -106,6 +119,20 @@
             object-fit: contain;
             animation: bounce-in 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             margin-bottom: 0;
+        }
+
+        /* Ensure logo has no top margin by default */
+        .logo { margin-top: 0 !important; }
+
+        /* Responsive logo clamp for very small viewports to avoid top cropping */
+        @media (max-width: 420px), (max-height: 720px) {
+            .logo {
+                width: clamp(48px, 12vmin, 80px);
+                margin-top: env(safe-area-inset-top, 6px);
+            }
+            /* also reduce the tutorial hand and top padding on phones */
+            #tutorial-pointer { width: clamp(48px, 18vmin, 140px) !important; }
+            #game-container { padding-top: calc(4vh + env(safe-area-inset-top, 0px)); }
         }
 
         /* Larger logo on start and game-over screens */
@@ -1161,93 +1188,11 @@
             100% { left: 200%; opacity: 0; }
         }
         
-        /* Game over / reward overlay styling */
-        #game-over {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 6000;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 22px;
-            background: linear-gradient(180deg, rgba(6,20,12,0.82), rgba(4,18,10,0.92));
-            backdrop-filter: blur(8px) saturate(1.05);
-            -webkit-backdrop-filter: blur(8px) saturate(1.05);
-            padding: 36px 20px;
-            /* ensure safe-area padding on phones so top content isn't hidden */
-            padding-top: calc(36px + env(safe-area-inset-top, 0px));
-            box-sizing: border-box;
-        }
-
-        #game-over .logo { width: clamp(160px, 24vmin, 300px); filter: drop-shadow(0 18px 36px rgba(0,0,0,0.6)); }
-        #game-over h1 { color: #fff; font-size: clamp(28px, 5.2vmin, 44px); margin: 6px 0 8px; text-shadow: 0 6px 20px rgba(0,0,0,0.6); }
-
-        .reward-card {
-            width: min(88vw, 520px);
-            background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-            border-radius: 18px;
-            padding: 18px;
-            box-shadow: 0 18px 50px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            position: relative;
-            overflow: visible;
-        }
-
-        .reward-card::before {
-            /* subtle blurred backdrop behind the card to elevate it */
-            content: '';
-            position: absolute;
-            left: 50%; top: 100%; transform: translate(-50%, -6%);
-            width: 86%; height: 46px; background: linear-gradient(90deg,#00e67633,#007f3a22); border-radius: 12px; filter: blur(22px); opacity: 0.9;
-            z-index: 0;
-        }
-
-        .reward-text { color: #cfd8d3; font-size: 15px; margin-bottom: 6px; }
-
-        .reward-display { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: transparent; padding: 8px 6px; z-index: 2; }
-        .reward-display-left { display:flex; align-items:center; gap:12px; }
-        .reward-display-logo { width:56px; height:56px; border-radius:12px; background: #fff; display:flex; align-items:center; justify-content:center; box-shadow: 0 10px 30px rgba(0,0,0,0.36); overflow:hidden; }
-        .reward-display-logo img { width:42px; height:auto; display:block; }
-        .reward-display-label { color:#e8f8ee; font-weight:700; font-size:18px; }
-
-        .reward-display-amount { font-size: clamp(28px, 6.2vmin, 48px); font-weight:900; color: #fff; text-shadow: 0 8px 18px rgba(0,0,0,0.6); margin-left: 8px; }
-
-        .more-cards { margin-top: 6px; display:flex; gap:8px; align-items:center; justify-content:center; z-index:2; }
-        .more-cards .card-fake { width: 220px; height: 56px; border-radius: 12px; box-shadow: 0 12px 36px rgba(0,0,0,0.48); transform-origin: center; }
-        .more-cards .card-fake.green { background: linear-gradient(90deg,#00e676,#00b85a); transform: translateY(12px) rotate(-6deg) scale(1.02); }
-        .more-cards .card-fake.black { background: linear-gradient(90deg,#ffffff,#f2f2f2); transform: translateY(6px) rotate(-2deg); opacity: 0.98; }
-        .more-cards .card-fake.gray { background: linear-gradient(90deg,#f6f6f6,#e6e6e6); transform: translateY(0px) rotate(2deg); opacity: 0.98; }
-
-        .reward-btn { width: min(72vw, 320px); height: 62px; border-radius: 18px; overflow: visible; }
-        .reward-btn .reward-img { display:none; }
-        .reward-btn { background: linear-gradient(90deg,#00e676,#00b85a); box-shadow: 0 18px 50px rgba(2,160,86,0.36), 0 6px 22px rgba(0,0,0,0.36); border: none; position: relative; }
-        .reward-btn .reward-btn-text { color: #053016; text-shadow: 0 2px 6px rgba(255,255,255,0.35); }
-        .reward-btn:hover { transform: translateY(-3px); box-shadow: 0 28px 72px rgba(2,160,86,0.46); }
-        .reward-btn:active { transform: translateY(0); }
-
-        /* subtle entrance for the overlay content */
-        #game-over.show { animation: game-over-in 420ms cubic-bezier(.2,.9,.25,1) forwards; }
-        @keyframes game-over-in { 0% { opacity: 0; transform: translateY(6px) scale(0.996); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        #game-over { display: none; }
 
         /* FORCE mobile overrides placed last to prevent earlier rules from winning
            Ensures desktop dock is hidden and floating mobile dock is visible */
         @media (max-width: 600px) {
-            /* Make game-over overlay scrollable and anchored to top on small screens */
-            #game-over {
-                align-items: flex-start;
-                justify-content: flex-start;
-                padding-top: calc(20px + env(safe-area-inset-top, 0px));
-                padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-                overflow-y: auto;
-            }
-            #game-over .logo { width: clamp(120px, 20vmin, 180px); margin-top: 6px; }
-            .reward-card { margin-top: 10px; width: 94vw; }
-            .more-cards .card-fake { width: 160px; height: 48px; }
-            .reward-btn { width: min(86vw, 320px); height: 56px; }
             /* Keep main dock visible on mobile */
             .mobile-dock-floating { display: flex !important; }
             /* position floating dock just above the 120px banner + safe area */
@@ -2686,8 +2631,7 @@
                         clearInterval(timerInterval);
                         const rewardAmount = Math.floor(score / 10);
                         document.getElementById('final-reward').innerText = rewardAmount;
-                        const go = document.getElementById('game-over');
-                        if (go) { go.style.display = 'flex'; go.classList.add('show'); }
+                        document.getElementById('game-over').style.display = 'flex';
                         const mobileBanner = document.getElementById('mobile-banner');
                         if (mobileBanner) mobileBanner.style.display = 'none';
                         // Animate bottom deck cards to move like real cards
