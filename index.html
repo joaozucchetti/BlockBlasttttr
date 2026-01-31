@@ -59,14 +59,15 @@
 
         /* Responsive Container */
     #game-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        /* FIX: Center vertically to remove the big gap at the bottom */
-        justify-content: center; 
-        width: 90%;
-        height: 100vh;
-        margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* FIX: Center vertically to remove the big gap at the bottom */
+    justify-content: center; 
+    width: 90%;
+    height: auto;
+    max-height: calc(100vh - var(--mobile-banner-height) - env(safe-area-inset-top, 0px));
+    margin: 0 auto;
         /* FIX: Use flexible vertical padding (vh) and respect top safe-area */
         padding: calc(2vh + env(safe-area-inset-top, 8px)) 10px; 
         
