@@ -7,8 +7,12 @@
         html, body {
             zoom: 1 !important;
             height: 100%;
-            /* allow scrolling on small devices to prevent top cropping by browser UI */
-            overflow: auto;
+            /* SCROLL LOCK: prevent page scrolling on most devices to keep game fixed */
+            overflow: hidden;
+        }
+        /* Exception: allow scrolling on small/tall mobile screens so the top UI isn't cropped */
+        @media (max-width: 420px), (max-height: 720px) {
+            html, body { overflow: auto; }
         }
     </style>
     <title>HeyCash!</title>
