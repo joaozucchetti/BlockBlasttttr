@@ -69,7 +69,8 @@
     max-height: calc(100vh - var(--mobile-banner-height) - env(safe-area-inset-top, 0px));
     margin: 0 auto;
         /* FIX: Use flexible vertical padding (vh) and respect top safe-area */
-        padding: calc(2vh + env(safe-area-inset-top, 8px)) 10px; 
+        /* Reduced top padding to tighten space between logo and top */
+        padding: calc(0.8vh + env(safe-area-inset-top, 6px)) 10px; 
         
         /* expose grid sizing variables so dock items can match grid cell size */
         --grid-size: clamp(300px, 45vmin, 380px);
@@ -83,11 +84,41 @@
     }
 
         @media (orientation: landscape) {
+            /* Landscape: arrange content horizontally for wider viewports */
             #game-container {
-                max-width: 700px;
-                flex-direction: column;
-                gap: 10px;
+                max-width: 100%;
+                width: 100%;
+                flex-direction: row; /* place logo and play-area side-by-side */
+                align-items: flex-start;
+                justify-content: center;
+                gap: clamp(8px, 2vmin, 18px);
+                padding: calc(1vh + env(safe-area-inset-top, 6px)) 12px;
             }
+
+            /* Let play-area expand while keeping the grid constrained by --grid-size */
+            .play-area {
+                flex: 1 1 auto;
+                max-width: calc(100% - 320px);
+                padding: 0 clamp(12px, 4vmin, 48px);
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            /* Smaller left-aligned logo in landscape */
+            .logo {
+                width: clamp(80px, 12vmin, 160px);
+                height: auto;
+                margin-right: 12px;
+                margin-bottom: 0;
+                align-self: flex-start;
+            }
+
+            /* Stack HUD and dock vertically to the right of the play-area */
+            .hud-row { order: 2; margin-bottom: 6px; }
+            .dock { order: 3; margin-top: 6px; align-self: flex-end; }
+
+            /* Ensure grid scales properly in landscape by capping grid-size relative to viewport height */
+            :root { --grid-size: clamp(260px, 50vmin, 420px); }
         }
 .dock {
     -ms-overflow-style: none;  /* IE and Edge */
@@ -129,8 +160,9 @@
         /* Runtime short-screen classes applied by JS (for devices like iPhone SE) */
         :root.short-screen .logo { width: clamp(44px, 11vmin, 76px); }
         :root.very-short-screen .logo { width: clamp(36px, 10vmin, 64px); }
-        :root.short-screen #game-container { padding-top: calc(3vh + env(safe-area-inset-top, 0px)); }
-        :root.very-short-screen #game-container { padding-top: calc(2vh + env(safe-area-inset-top, 0px)); }
+        /* Slightly lower padding for short/very-short screens to keep logo closer to top */
+        :root.short-screen #game-container { padding-top: calc(2vh + env(safe-area-inset-top, 0px)); }
+        :root.very-short-screen #game-container { padding-top: calc(1vh + env(safe-area-inset-top, 0px)); }
         :root.short-screen { --grid-size: clamp(260px, 38vmin, 320px); }
         :root.very-short-screen { --grid-size: clamp(220px, 34vmin, 280px); }
         :root.very-short-screen #tutorial-pointer { width: clamp(36px, 14vmin, 96px) !important; }
@@ -1145,10 +1177,10 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #171c15;
+            color: #00000094;
             font-family: 'Mona Sans', 'Helvetica', sans-serif;
             font-weight: 900;
-            font-size: clamp(22px, 4vw, 32px);
+            font-size: clamp(20px, 4vw, 22px);
             letter-spacing: 1px;
             text-transform: uppercase;
             pointer-events: none;
@@ -2179,9 +2211,8 @@
             // ensure the main in-layout logo is visible
             if (mainHeaderLogo) mainHeaderLogo.style.display = '';
             isGameActive = true;
-            // Show bottom banner on all screens (desktop included)
-            const mobileBanner = document.getElementById('mobile-banner');
-            if (mobileBanner) mobileBanner.style.display = 'flex';
+            // Do not automatically show the bottom banner here — it will be visible during tutorial and hidden after
+            // (keeps the banner DOM loaded but avoids re-showing it after tutorial)
             spawnBlocks();
             startTimer();
         }
@@ -2648,13 +2679,8 @@
         // Initialize board (but not game) on load
         // Keep mobile banner and dock responsive on resize
         window.addEventListener('resize', () => {
-            const mobileBanner = document.getElementById('mobile-banner');
-            // Keep banner visible across sizes while game is active
-            if (isGameActive && mobileBanner) {
-                mobileBanner.style.display = 'flex';
-            } else if (mobileBanner) {
-                mobileBanner.style.display = 'none';
-            }
+            // Re-evaluate whether the banner fits on screen
+            try { checkAndToggleBanner(); } catch(e) {}
             // Refresh dock contents to match current layout on small debounce
             clearTimeout(window.__spawnResizeTimer);
             window.__spawnResizeTimer = setTimeout(() => {
@@ -2691,6 +2717,36 @@
             const gap = parseFloat(styles.gap) || 0;
             const padding = parseFloat(styles.padding) || 0;
             return { gridRect, cellSize: cellRect.width, gap, padding, total: cellRect.width + gap };
+        }
+        
+        // Determine whether there is enough vertical room to show the mobile banner
+        function canShowBanner() {
+            try {
+                const docStyles = getComputedStyle(document.documentElement);
+                const bannerH = parseFloat(docStyles.getPropertyValue('--mobile-banner-height')) || 120;
+                const gridMetrics = getGridMetrics();
+                const gridH = gridMetrics.gridRect.height || 0;
+                const hud = document.querySelector('.hud-row');
+                const hudH = hud ? hud.getBoundingClientRect().height : 0;
+                const logo = document.querySelector('.logo');
+                const logoH = logo ? logo.getBoundingClientRect().height : 0;
+                const dock = document.querySelector('.dock');
+                const dockH = dock ? dock.getBoundingClientRect().height : 0;
+                const topInset = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-top') || 0) || 0;
+                const paddingExtra = 40; // small breathing room
+                const needed = bannerH + gridH + hudH + logoH + dockH + paddingExtra + topInset;
+                return window.innerHeight >= needed;
+            } catch (e) { return false; }
+        }
+
+        function checkAndToggleBanner(){
+            const mobileBanner = document.getElementById('mobile-banner');
+            if (!mobileBanner) return;
+            if ((isGameActive || isTutorialActive) && canShowBanner()) {
+                mobileBanner.style.display = 'flex';
+            } else {
+                mobileBanner.style.display = 'none';
+            }
         }
         function indexToCell(r,c){ return gridEl.querySelectorAll('.cell')[r*GRID_SIZE + c]; }
         function highlightCells(r, startC, len){
@@ -2786,8 +2842,8 @@
         function startTutorial() {
             // Ensure gameplay is disabled during tutorial
             isGameActive = false; isTutorialActive = true;
-            const mobileBanner = document.getElementById('mobile-banner');
-            if (mobileBanner) mobileBanner.style.display = 'none';
+            // Toggle banner only if there's room
+            try { checkAndToggleBanner(); } catch(e) {}
 
             tutorialOverlay.style.display = 'flex';
             // start light tutorial floats
@@ -2812,6 +2868,8 @@
                 const host = document.querySelector('.tutorial-floats');
                 if (host) host.querySelectorAll('.float').forEach(el => el.remove());
             } catch(e) {}
+            // Hide the mobile banner after the tutorial completes (keep DOM present but hidden)
+            try { const mobileBanner = document.getElementById('mobile-banner'); if (mobileBanner) mobileBanner.style.display = 'none'; } catch(e) {}
             userInteractStart();
         }
 
