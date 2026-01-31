@@ -200,6 +200,9 @@
             transform: scale(1.05); /* Slight hover effect */
         }
 
+        /* When the game is active, move install CTA off-screen (keeps DOM loaded) */
+        .offscreen-cta { transform: translateY(140%) !important; opacity: 0 !important; pointer-events: none !important; }
+
         @keyframes pulse-install {
             0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(0, 230, 118, 0)); }
             50% { transform: scale(1.01); filter: drop-shadow(0 0 12px rgba(0, 230, 118, 0.4)); }
@@ -617,6 +620,8 @@
             gap: 10px;
             color: #ffffff;
             font-weight: 800;
+        /* When the tutorial runs, hide the real HUD so the tutorial mock is the only visible HUD */
+        .in-tutorial .hud-row, .in-tutorial .hud-item { display: none !important; }
             font-size: clamp(16px, 5vmin, 28px);
             text-shadow: 0 4px 8px rgba(0,0,0,0.8);
         }
@@ -822,45 +827,71 @@
 
         /* --- MOBILE BANNER (white bottom on small screens) --- */
         .mobile-banner {
-            display: none; /* shown via media query */
             position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: var(--mobile-banner-height); /* slightly smaller for discreteness */
-            background: rgba(255, 255, 255, 0.654); /* subtle glass */
-            backdrop-filter: blur(8px) saturate(1.05);
-            -webkit-backdrop-filter: blur(8px) saturate(1.05);
-            border-top-left-radius: 26px;
-            border-top-right-radius: 26px;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 24px);
+            max-width: 980px;
+            height: var(--mobile-banner-height);
+            background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.60));
+            backdrop-filter: blur(10px) saturate(1.06);
+            -webkit-backdrop-filter: blur(10px) saturate(1.06);
+            border-radius: 22px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            padding: 12px 14px;
+            gap: 10px;
+            padding: 8px 12px;
             box-sizing: border-box;
             z-index: 3500;
-            box-shadow: 0 -6px 18px rgba(0,0,0,0.06);
-            border-top: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+            border: 1px solid rgba(255,255,255,0.22);
             color: rgba(7,32,20,0.95);
             transition: opacity 360ms ease, transform 360ms ease;
+            overflow: hidden;
+            position: fixed;
+        }
+
+        .mobile-banner::before{
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            background: linear-gradient(180deg, rgba(255,255,255,0.25), rgba(255,255,255,0.04));
+            mix-blend-mode: overlay;
+            opacity: 0.95;
+        }
+
+        .mobile-banner::after{
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            width: calc(100% - 16px);
+            height: calc(100% - 16px);
+            border-radius: 18px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.45);
+            pointer-events: none;
+            opacity: 0.6;
         }
 
         .mobile-banner .mobile-left { display:flex; align-items:center; gap:10px; }
         .mobile-side-logo {
-            width: 44px;
-            height: 44px;
+            width: 36px;
+            height: 36px;
             object-fit: contain;
             border-radius: 8px;
             margin-right: 6px;
             display: inline-block;
         }
         .mobile-logo { width:44px; height:44px; background: url('images/Logo.png') center/contain no-repeat; background-color: transparent; border-radius:8px; }
-        .mobile-text { color: #072014; font-weight:700; font-size:14px; line-height:1; }
-        .mobile-sub { font-weight:600; font-size:12px; color: #556b6a; }
+        .mobile-text { color: #072014; font-weight:700; font-size:13px; line-height:1; }
+        .mobile-sub { font-weight:600; font-size:11px; color: #556b6a; }
 
-        .mobile-dock { display:flex; gap:10px; align-items:center; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:6px; max-width: 55%; }
-        .mobile-dock .block-cell { width: 36px; height: 36px; border-radius:6px; box-shadow: 0 6px 14px rgba(0,0,0,0.28); }
+        .mobile-dock { display:flex; gap:8px; align-items:center; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:4px; max-width: 46%; }
+        .mobile-dock .block-cell { width: 30px; height: 30px; border-radius:6px; box-shadow: 0 6px 12px rgba(0,0,0,0.2); }
 
         /* Floating dock that appears above the mobile banner */
         .mobile-dock-floating { display:none; }
@@ -872,17 +903,18 @@
         .mobile-coin { width:34px; height:34px; border-radius:50%; background: radial-gradient(circle at 35% 30%, #fff5b1, #ffd24d 40%, #00e676 70%); display:flex; align-items:center; justify-content:center; color:#06401f; font-weight:900; box-shadow: 0 6px 14px rgba(0,0,0,0.25); font-size:18px; }
 
         /* Mobile install image (banner) */
-        .mobile-install-img { width: 120px; height: 44px; object-fit: contain; display:inline-block; cursor: pointer; box-shadow: 0 6px 12px rgba(0,0,0,0.08); border-radius: 10px; background: transparent; }
+        .mobile-install-img { width: 104px; height: 36px; object-fit: contain; display:inline-block; cursor: pointer; box-shadow: 0 6px 12px rgba(0,0,0,0.08); border-radius: 10px; background: transparent; flex: 0 0 auto; }
 
         /* Gift card graphics for the banner */
         .gift-cards-icon {
             position: relative;
-            width: 96px;
-            height: 56px;
-            margin: 0 12px;
+            width: 72px;
+            height: 44px;
+            margin: 0 8px;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex: 0 0 auto;
         }
 
         .card-graphic {
@@ -927,10 +959,10 @@
         /* Mobile-banner specific gift-card overrides (smaller, compact stack) */
         .mobile-banner .gift-card {
             position: absolute;
-            width: 52px;
-            height: 36px;
+            width: 44px;
+            height: 30px;
             border-radius: 8px;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.14);
             border: 1px solid rgba(0,0,0,0.06);
             left: 0; top: 0;
             background-size: cover;
@@ -938,7 +970,7 @@
         .mobile-banner .gift-card.g1 { left: 6px; top: 0; transform: rotate(-8deg); background: linear-gradient(135deg,#00c853,#00e676); z-index:3; }
         .mobile-banner .gift-card.g2 { left: 20px; top: 6px; transform: rotate(0deg); background: linear-gradient(135deg,#0056b3,#1e88e5); z-index:2; }
         .mobile-banner .gift-card.g3 { left: 34px; top: 12px; transform: rotate(8deg); background: linear-gradient(135deg,#ff9900,#ffb74d); z-index:1; }
-        .mobile-banner .gift-card .card-logo { width: 22px; height:22px; right:6px; top:6px; }
+        .mobile-banner .gift-card .card-logo { width: 18px; height:18px; right:6px; top:6px; }
 
 /* Desktop: show banner as a vertical card on the right side AND squish layout */
 @media (min-width: 600px) {
@@ -1773,6 +1805,15 @@
             min-width: 220px;
         }
 
+        /* Tutorial HUD mock and progress dots */
+        .tutorial-hud { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(12vh + var(--safe-bottom)); display:flex; gap:18px; z-index:3600; pointer-events:none; }
+        .tutorial-hud .t-hud-item { background: rgba(0,0,0,0.42); padding:8px 12px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.35); display:flex; flex-direction:column; align-items:center; min-width:84px; }
+        .tutorial-hud .t-label { color: #cfead6; font-weight:700; font-size:12px; }
+        .tutorial-hud .t-value { color:#fff; font-weight:900; font-size:18px; margin-top:4px; }
+        .tutorial-progress { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(6vh + var(--safe-bottom)); display:flex; gap:8px; z-index:3600; pointer-events:none; }
+        .tutorial-progress .dot { width:10px; height:10px; border-radius:50%; background: rgba(255,255,255,0.24); box-shadow: 0 6px 16px rgba(0,0,0,0.35); transition: transform .28s ease, background .28s ease; }
+        .tutorial-progress .dot.active { background: #00e676; transform: scale(1.35); box-shadow: 0 10px 26px rgba(0,230,118,0.28); }
+
         /* tutorial banner entrance */
         .tutorial-banner.animate {
             animation: tut-banner-pop 760ms cubic-bezier(.2,.9,.25,1);
@@ -1917,6 +1958,36 @@
         /* Add a gentle horizontal sway on top of vertical float */
         .float.sway { animation-name: floatY, floatSway; animation-timing-function: linear, ease-in-out; animation-iteration-count: infinite, infinite; }
         @keyframes floatSway { 0% { transform: translateX(0) rotate(0deg); } 50% { transform: translateX(6px) rotate(-3deg); } 100% { transform: translateX(0) rotate(0deg); } }
+        /* Compact mode tweaks: tighter spacing for small devices */
+        @media (max-width: 480px) {
+            :root { --mobile-banner-height: 64px; --gap: 0.45vmin; --grid-size: calc(min(56vmax, 360px)); }
+            /* HUD pill: smaller and tighter */
+            .hud-item.single-pill { padding: 8px 12px; border-radius: 18px; }
+            .hud-item.compact { padding: 6px 8px; min-height: 50px; }
+            .hud-item .hud-label { font-size: 10px; }
+            .hud-item .hud-value { font-size: clamp(16px, 3vmin, 20px); }
+            .hud-row { margin-bottom: 6px; }
+            /* Dock: reduce padding and gaps so it fits neatly */
+            .dock { padding: 8px 8px; gap: 8px; }
+            .dock .block-shape { padding: 4px; border-radius: 10px; }
+            .dock .block-cell { width: calc(var(--cell-size) * 0.78); height: calc(var(--cell-size) * 0.78); }
+            /* Mobile banner shrink slightly */
+            .mobile-banner { height: var(--mobile-banner-height); padding: 8px 12px; gap: 8px; }
+            .mobile-banner .mobile-left .mobile-title { font-size: 13px; }
+            .mobile-banner .mobile-install-img { width: 78%; max-width: 220px; }
+            /* Make tutorial HUD sit a little higher above banner */
+            #tutorial-hud { bottom: calc(14vh + var(--safe-bottom)); }
+            /* grid spacing reduced to save vertical space */
+            .grid-container { margin: 6px auto; }
+        }
+
+        /* Extra tight for very small phones */
+        @media (max-width: 360px) {
+            :root { --mobile-banner-height: 60px; --grid-size: calc(min(54vmax, 320px)); }
+            .hud-item .hud-value { font-size: clamp(14px, 3vmin, 18px); }
+            .hud-item.compact { min-height: 46px; }
+            .mobile-banner .mobile-install-img { width: 72%; }
+        }
     </style>
 </head>
 <style>
@@ -1965,6 +2036,12 @@
 </style>
 <body>
 
+<style>
+    /* Ensure mobile banner remains visible and content keeps room for it */
+    .mobile-banner { display: flex !important; }
+    #game-container { padding-bottom: calc(var(--mobile-banner-height) + env(safe-area-inset-bottom, 0px) + 12px); }
+</style>
+
         <!-- Loading overlay (shown until assets are preloaded) -->
         <div id="loading-overlay">
             <img src="images/Logo.png" alt="HeyCash" class="loading-logo">
@@ -2000,6 +2077,13 @@
             </div>
             <!-- Banner over the real grid -->
             <div id="tutorial-banner" class="tutorial-banner">Drag Blocks To Earn Your First Reward!</div>
+            <!-- tutorial HUD mock removed per request -->
+            <!-- Progress dots for tutorial steps -->
+            <div id="tutorial-progress" class="tutorial-progress" aria-hidden="true">
+                <span class="dot active" aria-hidden="true"></span>
+                <span class="dot" aria-hidden="true"></span>
+                <span class="dot" aria-hidden="true"></span>
+            </div>
             <!-- Hand pointer that moves from dock to grid -->
             <img id="tutorial-pointer" src="images/hand.png" style="width:228px;position:fixed;left:-240px;top:-240px;opacity:0.98;z-index:4000;transition:left 1.6s cubic-bezier(.25,.9,.26,1), top 1.6s cubic-bezier(.25,.9,.26,1);filter:drop-shadow(0 16px 44px rgba(0,0,0,0.6));transform-origin:center;" alt="pointer">
             <!-- Reward pop texts centered on real grid -->
@@ -2007,6 +2091,15 @@
             <div id="tutorial-pop-time" style="position:fixed;left:52%;top:56%;transform:translate(-50%,-50%);color:#71f588;font-weight:900;font-size:24px;opacity:0;text-shadow:0 4px 8px rgba(0,0,0,.5);pointer-events:none;z-index:4000;">+2s</div>
             <button id="tutorial-cta" onclick="tutorialNextStep()" style="margin-top:44px;font-size:clamp(22px,5vw,26px);background:linear-gradient(90deg,#01e991 80%,#38ff4f 110%);border:none;border-radius:2em;letter-spacing:1.2px;font-weight:900;color:#175e35;box-shadow:0 10px 40px #14e35b32;padding:20px 54px;cursor:pointer;display:none;">Start Playing</button>
         </div>
+
+        <!-- Post-tutorial splash shown briefly before handing control to the player -->
+        <div id="your-turn-splash" style="display:none; position:fixed; inset:0; z-index:4005; align-items:center; justify-content:center; pointer-events:none;">
+            <div class="your-turn-card" style="pointer-events:auto; background:linear-gradient(180deg,#ffffff,#f7fff7); border-radius:18px; padding:18px 26px; box-shadow:0 18px 48px rgba(0,0,0,0.18); text-align:center; max-width:86%; margin:auto;">
+                <div class="yt-main" style="font-weight:900; font-size:clamp(28px,6.5vw,48px); color:#003a17; line-height:1;">Your Turn!</div>
+                <div class="yt-sub" style="margin-top:6px; font-weight:700; font-size:14px; color:#2f6b50;">Tap to play</div>
+            </div>
+        </div>
+
         <div id="game-container">
         <img src="images/Logo.png" alt="HeyCash Logo" class="logo" style="width: clamp(420px, 40vmin, 700px); max-width: 60%; height: auto;">
         
@@ -2043,7 +2136,7 @@
         </div>
     </div>
 
-    <div class="mobile-banner" id="mobile-banner" style="display:none;" onclick="installApp()">
+    <div class="mobile-banner" id="mobile-banner">
         <div class="mobile-left">
             <img src="images/Logo2 - Small.png" alt="HeyCash small logo" class="mobile-side-logo">
             <div class="mobile-text">
@@ -2059,8 +2152,7 @@
             <div class="gift-card g3"><div class="card-logo" aria-hidden="true"></div></div>
         </div>
 
-        <div id="mobile-dock" class="mobile-dock" aria-hidden="false"></div>
-        <img src="images/install-cta.png" class="mobile-install-img" id="mobile-install" alt="Install HeyCash" aria-label="Install HeyCash">
+        <!-- removed install CTA and dock per request: banner now shows only app pic+text and gift cards -->
     </div>
 
     <!-- Start screen removed: game starts immediately -->
@@ -2279,6 +2371,7 @@
             // ensure the main in-layout logo is visible
             if (mainHeaderLogo) mainHeaderLogo.style.display = '';
             isGameActive = true;
+            try { hideInstallCTA(); } catch(e) {}
             // Do not automatically show the bottom banner here — it will be visible during tutorial and hidden after
             // (keeps the banner DOM loaded but avoids re-showing it after tutorial)
             spawnBlocks();
@@ -2622,6 +2715,18 @@
             } catch(e){}
         }
 
+        // Hide or show the install CTA(s) by moving them off-screen while keeping DOM present
+        function hideInstallCTA(){
+            try{
+                document.querySelectorAll('.mobile-install-img, .desktop-install-cta, .install-cta').forEach(el => el.classList.add('offscreen-cta'));
+            }catch(e){}
+        }
+        function showInstallCTA(){
+            try{
+                document.querySelectorAll('.mobile-install-img, .desktop-install-cta, .install-cta').forEach(el => el.classList.remove('offscreen-cta'));
+            }catch(e){}
+        }
+
         function checkLines() {
             let rowsToClear = [], colsToClear = [];
 
@@ -2735,13 +2840,14 @@
         }
 
                 function endGame() {
-                        isGameActive = false;
+                                isGameActive = false;
+                                try { showInstallCTA(); } catch(e) {}
                         clearInterval(timerInterval);
                         const rewardAmount = Math.floor(score / 10);
                         document.getElementById('final-reward').innerText = rewardAmount;
                         document.getElementById('game-over').style.display = 'flex';
                         const mobileBanner = document.getElementById('mobile-banner');
-                        if (mobileBanner) mobileBanner.style.display = 'none';
+                        if (mobileBanner) mobileBanner.style.display = 'flex';
                         // Animate bottom deck cards to move like real cards
                         try {
                             const deckCards = document.querySelectorAll('#game-over .more-cards .card-fake');
@@ -2824,11 +2930,8 @@
         function checkAndToggleBanner(){
             const mobileBanner = document.getElementById('mobile-banner');
             if (!mobileBanner) return;
-            if ((isGameActive || isTutorialActive) && canShowBanner()) {
-                mobileBanner.style.display = 'flex';
-            } else {
-                mobileBanner.style.display = 'none';
-            }
+            // Keep the mobile banner visible always per user request.
+            try { mobileBanner.style.display = 'flex'; } catch(e){}
         }
         function indexToCell(r,c){ return gridEl.querySelectorAll('.cell')[r*GRID_SIZE + c]; }
         function highlightCells(r, startC, len){
@@ -2924,6 +3027,8 @@
         function startTutorial() {
             // Ensure gameplay is disabled during tutorial
             isGameActive = false; isTutorialActive = true;
+            // add class to hide the real HUD while tutorial runs
+            try { document.documentElement.classList.add('in-tutorial'); } catch(e){}
             // Toggle banner only if there's room
             try { checkAndToggleBanner(); } catch(e) {}
 
@@ -2943,6 +3048,8 @@
             clearHighlightsReal();
             restoreState();
             isTutorialActive = false;
+            // remove tutorial class to restore HUD
+            try { document.documentElement.classList.remove('in-tutorial'); } catch(e){}
             // cleanup tutorial floats
             try {
                 clearInterval(window.__tutFloatTimer);
@@ -2950,9 +3057,32 @@
                 const host = document.querySelector('.tutorial-floats');
                 if (host) host.querySelectorAll('.float').forEach(el => el.remove());
             } catch(e) {}
-            // Hide the mobile banner after the tutorial completes (keep DOM present but hidden)
-            try { const mobileBanner = document.getElementById('mobile-banner'); if (mobileBanner) mobileBanner.style.display = 'none'; } catch(e) {}
-            userInteractStart();
+            // Keep the mobile banner visible after tutorial completes per request
+            try { const mobileBanner = document.getElementById('mobile-banner'); if (mobileBanner) mobileBanner.style.display = 'flex'; } catch(e) {}
+            // show a brief splash before handing control to the player
+            try { showYourTurnSplash(); } catch(e) { userInteractStart(); }
+        }
+
+        // Show a short 'Your Turn!' splash then start the game
+        function showYourTurnSplash(){
+            const el = document.getElementById('your-turn-splash');
+            if (!el) { userInteractStart(); return; }
+            const card = el.querySelector('.your-turn-card');
+            el.style.display = 'flex';
+            el.style.opacity = '0';
+            el.style.transition = 'opacity 260ms ease';
+            el.style.pointerEvents = 'auto';
+            card.style.transform = 'translateY(10px) scale(.98)';
+            card.style.transition = 'transform 360ms cubic-bezier(.2,.9,.26,1)';
+            requestAnimationFrame(()=>{ el.style.opacity = '1'; card.style.transform = 'translateY(0) scale(1)'; });
+
+            let dismissed = false;
+            function dismiss(){ if (dismissed) return; dismissed = true; el.style.opacity = '0'; el.style.pointerEvents = 'none'; setTimeout(()=>{ el.style.display = 'none'; try{ userInteractStart(); }catch(e){} }, 360); }
+
+            // tap/click to dismiss immediately
+            el.addEventListener('click', function onClick(){ el.removeEventListener('click', onClick); dismiss(); });
+            // auto-dismiss after a short moment in case user doesn't tap
+            setTimeout(()=>{ dismiss(); }, 1600);
         }
 
         function tutorialNextStep(){
@@ -2979,6 +3109,21 @@
             // add entrance animation class
             tutorialBanner.classList.add('animate');
 
+                // tutorial helper elements (progress dots + hud) — present in DOM
+                const tutorialProgressEl = document.getElementById('tutorial-progress');
+                const tHudRewards = document.getElementById('t-rewards');
+                function setTutStage(n){
+                    try{
+                        if (tutorialProgressEl){
+                            const dots = tutorialProgressEl.querySelectorAll('.dot');
+                            dots.forEach((d,i)=> d.classList.toggle('active', i===n));
+                        }
+                        if (tHudRewards) tHudRewards.innerText = `${Math.max(0, rewardsCount||0)}$`;
+                    }catch(e){}
+                }
+                // initialize stage indicator
+                setTutStage(0);
+
             // STEP 1: Place a block (no clear)
             // Banner slightly above center for placement clarity
             tutorialBanner.style.top = (gridRect.top + gridRect.height * 0.28) + 'px';
@@ -2986,6 +3131,7 @@
             for (let r=0;r<GRID_SIZE;r++) for (let c=0;c<GRID_SIZE;c++) gridState[r][c] = null;
             updateGridVisuals();
             tutorialBanner.textContent = 'Step 1 of 3 · Drag a block to place it — earn money when you clear lines';
+            setTutStage(0);
             const m1 = [[1,1],[1,1]]; // 2x2 square
             highlightArea(2,2,2,2);
             await animateGhostPlacement(m1, 2, 2, 2);
@@ -2995,6 +3141,7 @@
             // Lower banner a bit to make room for the pointer and row action
             tutorialBanner.style.top = (gridRect.top + gridRect.height * 0.36) + 'px';
             tutorialBanner.textContent = 'Step 2 of 3 · Complete a row to clear it — you just earned cash, keep an eye on the timer';
+            setTutStage(1);
             for (let r=0;r<GRID_SIZE;r++) for (let c=0;c<GRID_SIZE;c++) gridState[r][c] = null;
             const demoRow = 3; const startCol = 2; const pieceLen = 3; const colorIdx = 2;
             for (let c=0;c<GRID_SIZE;c++) if (c<startCol || c>startCol+pieceLen-1) gridState[demoRow][c] = colorIdx;
@@ -3017,6 +3164,7 @@
             // Raise banner higher for column action so it doesn't overlap the column
             tutorialBanner.style.top = (gridRect.top + gridRect.height * 0.22) + 'px';
             tutorialBanner.textContent = 'Step 3 of 3 · Complete a column to clear it — every clear adds to your round total';
+            setTutStage(2);
             for (let r=0;r<GRID_SIZE;r++) for (let c=0;c<GRID_SIZE;c++) gridState[r][c] = null;
             const demoCol = 4; const startRow = 2; const vLen = 3;
             for (let r=0;r<GRID_SIZE;r++) if (r<startRow || r>startRow+vLen-1) gridState[r][demoCol] = colorIdx;
