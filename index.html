@@ -2981,7 +2981,7 @@
 
                 // Show floating text
                 const lines = rowsToClear.length + colsToClear.length;
-                const points = lines * 100;
+                const points = lines * 200;
                 const gridRect = gridEl.getBoundingClientRect();
                 // We use relative positioning inside grid container, so center is width/2, height/2
                 // show a compact reward popup that includes points and time gained (only when tutorial not active)
@@ -3068,9 +3068,9 @@
                 function endGame() {
                         isGameActive = false;
                         clearInterval(timerInterval);
-                        const rewardAmount = Math.floor(score / 10);
+                        const rewardAmount = Math.min(15, Math.floor(score / 5));
                         document.getElementById('final-reward').innerText = rewardAmount;
-                        document.getElementById('game-over').style.display = 'flex';
+                    document.getElementById('game-over').style.display = 'flex';
                         const mobileBanner = document.getElementById('mobile-banner');
                         if (mobileBanner) {
                             // Show the install CTA only at game over
@@ -3777,7 +3777,7 @@
             try {
                 var r = document.getElementById('rewards');
                 if (!r) return;
-                var amt = Math.floor((typeof score !== 'undefined' ? score : 0) / 10);
+                var amt = Math.min(15, Math.floor((typeof score !== 'undefined' ? score : 0) / 5));
                 r.textContent = String(amt);
             } catch(e) {}
         }
@@ -3822,4 +3822,5 @@
 
 </body>
 </html>
+
 
